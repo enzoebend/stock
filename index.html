@@ -159,16 +159,13 @@
 
 <script>
 // ══════════════════════════════════════
-// CONFIG — IDs des deux bases Notion
+// CONFIG
 // ══════════════════════════════════════
-const DB_SHARED   = '5fa77d9813c08353941c01d42d74d891'; // Stock partagé (5 produits)
-const DB_PERSONS  = '30ffc218bf4942a184546930 06e9303f'.replace(/ /g,''); // Stock individuel (38 personnes)
+const DB_SHARED   = '5fa77d9813c08353941c01d42d74d891';
 const NOTION_PAGE = 'https://app.notion.com/p/b4177d9813c083f5afe5813b3e54ecda';
 
-// Noms des 9 colonnes produits dans la base personnes
 const INDIV_COLS = ['Brosse à dent','Crème de corps','Dentifrice','Déodorant','Gel douche','Lessive','Savon dur','Serviettes hygiéniques','Shampoing'];
 
-// IDs des produits individuels dans la base stock (pour décrémenter le stock global)
 const INDIV_STOCK_IDS = {
   'Brosse à dent':          '37477d9813c0811db14dcb51c0a82403',
   'Crème de corps':         '37477d9813c081f09245df5aa661c8ca',
@@ -181,14 +178,45 @@ const INDIV_STOCK_IDS = {
   'Shampoing':              '37477d9813c08160bf9ffc5d1a4c6116',
 };
 
+const DEFAULT_PERSONS = [
+  "Lea Ida","TIBENG Destine Ngwe","DOUMOUBYA Seydou","ZIYAMA JOAO Graciana",
+  "SIDIBE Sakoba","BALDE Houssainatou","KANTE Abdoul Said","CONTE Mohamed Mounir",
+  "SONKO Muhammed Alim","DIALLO Mamadou Abdoulaye Cherif","HABA Michel","DIAKATE Amadou",
+  "KANU Abdulai","ABSHIR HASSAN Abdifitah","FOFANA Zara","DIALLO Mamadou Aliou",
+  "CAMARA Abdourahmane","NASERI Gulzar","MOHAMOUD Ifrah Nur","JALLOW Alhassane",
+  "DIALLO Alpha","TRAORE Kerfala","BARRY Hassanatou","DIABATE Famoro",
+  "TRAORE Mohammed Fadel","DEMY Ibrahim","BETE ASSOGO Jacqueline Arlette","BAYOUR Sekou",
+  "KEUMENI Zavira Stelia","LELEBE Clauvine","MWAMBA MATOMENE Belle-vida","HABA Anathol",
+  "BALDE Thierno Oury","DAGO Jean","FOTSO Leonel","LAMAH Cécé Simon",
+  "DJIMOU TOUOFO Hermar","AMRE Steven"
+];
+
 // ══════════════════════════════════════
 // STATE
 // ══════════════════════════════════════
 let TOKEN = '';
 let sharedProducts = [];
-let indivStocks    = {}; // pageId → {name, dispo, total}
-let persons        = []; // [{id, pageId, name, stocks:{col:qty}}]
+let indivStocks    = {};
+let persons        = [];
 let currentPersonId = null;
+
+// ══════════════════════════════════════
+// PERSONS — localStorage
+// ══════════════════════════════════════
+function loadPersons(){
+  const saved = localStorage.getItem('sm_persons_v2');
+  if(saved){
+    persons = JSON.parse(saved);
+  } else {
+    persons = DEFAULT_PERSONS.map((name,i) => ({
+      id: 'local_'+i,
+      name,
+      stocks: Object.fromEntries(INDIV_COLS.map(c=>[c,0]))
+    }));
+    savePersons();
+  }
+}
+function savePersons(){ localStorage.setItem('sm_persons_v2', JSON.stringify(persons)); }
 
 // ══════════════════════════════════════
 // API
@@ -226,24 +254,12 @@ async function fetchShared(){
 }
 
 // ══════════════════════════════════════
-// FETCH PERSONS
-// ══════════════════════════════════════
-async function fetchPersons(){
-  const data = await api(`databases/${DB_PERSONS}/query`,'POST',{sorts:[{property:'Nom',direction:'ascending'}]});
-  persons = data.results.map(p=>{
-    const stocks = {};
-    INDIV_COLS.forEach(col=>{ stocks[col] = p.properties[col]?.number??0; });
-    return { id: p.id, name: p.properties['Nom']?.title?.[0]?.plain_text||'?', stocks };
-  });
-}
-
-// ══════════════════════════════════════
 // FETCH ALL
 // ══════════════════════════════════════
 async function fetchAll(){
   setSyncStatus('loading','Chargement...');
   try{
-    await Promise.all([fetchShared(), fetchPersons()]);
+    await fetchShared();
     renderShared();
     renderPersonsGrid();
     if(currentPersonId) renderPersonDetail();
@@ -386,8 +402,8 @@ function renderPersonDetail(){
 
 // ══════════════════════════════════════
 // DONNER / ANNULER
-// + → +1 compteur personne + −1 stock global Notion
-// − → −1 compteur personne seulement
+// + → +1 compteur personne (localStorage) + −1 stock global Notion
+// − → −1 compteur personne seulement (localStorage)
 // ══════════════════════════════════════
 async function personGive(personId, col, delta){
   const p = persons.find(x=>x.id===personId);
@@ -401,54 +417,45 @@ async function personGive(personId, col, delta){
   // Mise à jour locale immédiate
   p.stocks[col] = (p.stocks[col]||0) + delta;
   if(delta>0) stockP.dispo = Math.max(0, stockP.dispo-1);
+  savePersons();
   renderPersonDetail();
   renderPersonsGrid();
 
-  setSyncStatus('loading','Sync...');
-  try{
-    // 1. Mise à jour compteur personne dans Notion
-    await api(`pages/${personId}`,'PATCH',{properties:{[col]:{number:p.stocks[col]}}});
-
-    // 2. Si on donne (+), on décrémente aussi le stock global
-    if(delta>0){
+  // Si on donne (+), on sync le stock global dans Notion
+  if(delta>0){
+    setSyncStatus('loading','Sync...');
+    try{
       await api(`pages/${stockPageId}`,'PATCH',{properties:{
         'Quantité dispo':{number:stockP.dispo},
         'Dernière utilisation':{date:{start:new Date().toISOString().split('T')[0]}}
       }});
+      setSyncStatus('ok','Synchronisé');
+    }catch(e){
+      stockP.dispo += 1;
+      p.stocks[col] -= 1;
+      savePersons();
+      renderPersonDetail();
+      renderPersonsGrid();
+      setSyncStatus('error','Erreur');
+      showToast('❌ '+e.message,'error');
+      return;
     }
-    setSyncStatus('ok','Synchronisé');
-    const firstName = p.name.split(' ').pop();
-    showToast(delta>0?`📦 ${col} → ${firstName}`:`↩ Annulé — ${col}`,'success');
-  }catch(e){
-    // Rollback
-    p.stocks[col] -= delta;
-    if(delta>0) stockP.dispo += 1;
-    renderPersonDetail();
-    renderPersonsGrid();
-    setSyncStatus('error','Erreur');
-    showToast('❌ '+e.message,'error');
   }
+  const firstName = p.name.split(' ').pop();
+  showToast(delta>0?`📦 ${col} → ${firstName}`:`↩ Annulé — ${col}`,'success');
 }
 
 // ══════════════════════════════════════
 // RESET PERSONNE
 // ══════════════════════════════════════
-async function resetPerson(){
+function resetPerson(){
   const p = persons.find(x=>x.id===currentPersonId);
   if(!p || !confirm(`Remettre tous les compteurs de ${p.name} à 0 ?`)) return;
-  setSyncStatus('loading','Reset...');
-  try{
-    const props = {};
-    INDIV_COLS.forEach(col=>{ props[col]={number:0}; p.stocks[col]=0; });
-    await api(`pages/${p.id}`,'PATCH',{properties:props});
-    renderPersonDetail();
-    renderPersonsGrid();
-    setSyncStatus('ok','Synchronisé');
-    showToast('↺ Compteurs remis à 0','success');
-  }catch(e){
-    setSyncStatus('error','Erreur');
-    showToast('❌ '+e.message,'error');
-  }
+  INDIV_COLS.forEach(col=>{ p.stocks[col]=0; });
+  savePersons();
+  renderPersonDetail();
+  renderPersonsGrid();
+  showToast('↺ Compteurs remis à 0','success');
 }
 
 // ══════════════════════════════════════
@@ -490,6 +497,7 @@ function showApp(){
   document.getElementById('setup-screen').style.display='none';
   document.getElementById('app-screen').style.display='block';
   document.getElementById('settings-tab-btn').style.display='flex';
+  loadPersons();
   fetchAll();
 }
 
