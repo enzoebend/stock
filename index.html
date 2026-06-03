@@ -7,14 +7,8 @@
   <link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Syne:wght@700;800&display=swap" rel="stylesheet"/>
   <style>
     *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
-    :root{
-      --bg:#0f0f0f;--surface:#1a1a1a;--surface2:#242424;--border:#2e2e2e;
-      --text:#f0f0f0;--muted:#666;--ok:#2ecc71;--warn:#f39c12;--danger:#e74c3c;--accent:#4f8ef7;
-      --mono:'DM Mono',monospace;--display:'Syne',sans-serif;
-    }
+    :root{--bg:#0f0f0f;--surface:#1a1a1a;--surface2:#242424;--border:#2e2e2e;--text:#f0f0f0;--muted:#666;--ok:#2ecc71;--warn:#f39c12;--danger:#e74c3c;--accent:#4f8ef7;--mono:'DM Mono',monospace;--display:'Syne',sans-serif;}
     body{background:var(--bg);color:var(--text);font-family:var(--mono);min-height:100vh}
-
-    /* HEADER */
     header{background:var(--surface);border-bottom:1px solid var(--border);padding:12px 16px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:100}
     .header-left{display:flex;align-items:center;gap:10px}
     .logo-circle{width:36px;height:36px;border-radius:50%;background:var(--accent);display:flex;align-items:center;justify-content:center;font-family:var(--display);font-weight:800;font-size:0.9rem;color:#fff;flex-shrink:0}
@@ -26,39 +20,27 @@
     @keyframes pulse{0%,100%{opacity:1}50%{opacity:0.3}}
     .gear-btn{background:none;border:1px solid var(--border);border-radius:6px;color:var(--muted);width:32px;height:32px;display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:0.9rem;transition:all 0.2s}
     .gear-btn:hover{border-color:var(--accent);color:var(--accent)}
-
-    /* SETUP */
     #setup-screen{padding:40px 20px;max-width:480px;margin:0 auto}
     #setup-screen h2{font-family:var(--display);font-size:1.5rem;margin-bottom:8px}
     #setup-screen p{color:var(--muted);font-size:0.8rem;margin-bottom:28px;line-height:1.6}
     .field{margin-bottom:16px}
     .field label{display:block;font-size:0.72rem;color:var(--muted);margin-bottom:6px;text-transform:uppercase;letter-spacing:1px}
     .field input{width:100%;background:var(--surface);border:1px solid var(--border);border-radius:8px;color:var(--text);font-family:var(--mono);font-size:0.82rem;padding:11px 13px;outline:none;transition:border-color 0.2s}
-    .field input:focus{border-color:var(--accent)}
-    .field input::placeholder{color:var(--muted)}
+    .field input:focus{border-color:var(--accent)}.field input::placeholder{color:var(--muted)}
     .btn-primary{width:100%;background:var(--accent);color:#fff;border:none;border-radius:8px;font-family:var(--display);font-size:0.95rem;font-weight:700;padding:13px;cursor:pointer;transition:opacity 0.2s}
     .btn-primary:hover{opacity:0.9}.btn-primary:disabled{opacity:0.4;cursor:not-allowed}
     .help-box{background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:14px 16px;margin-top:20px;font-size:0.75rem;color:var(--muted);line-height:1.7}
     .help-box strong{color:var(--text)}.help-box a{color:var(--accent);text-decoration:none}
     #error-msg{color:var(--danger);font-size:0.78rem;margin-top:10px;display:none}
-
-    /* TABS */
     #app-screen{display:none}
     .tabs-bar{background:var(--surface);border-bottom:1px solid var(--border);padding:0 12px;display:flex;align-items:center;gap:2px;overflow-x:auto;scrollbar-width:none}
     .tabs-bar::-webkit-scrollbar{display:none}
     .tab{flex-shrink:0;padding:11px 12px;font-family:var(--mono);font-size:0.75rem;color:var(--muted);border:none;background:none;cursor:pointer;border-bottom:2px solid transparent;transition:all 0.2s;white-space:nowrap}
-    .tab.active{color:var(--accent);border-bottom-color:var(--accent)}
-    .tab:hover:not(.active){color:var(--text)}
-
-    /* CONTENT */
+    .tab.active{color:var(--accent);border-bottom-color:var(--accent)}.tab:hover:not(.active){color:var(--text)}
     .tab-content{padding:16px;max-width:600px;margin:0 auto}
-
-    /* ALERTS */
     .alert-banner{display:none;background:#1a0a0a;border:1px solid var(--danger);border-radius:10px;padding:12px 16px;margin-bottom:14px;font-size:0.78rem;color:#ff8a80;line-height:1.6}
     .alert-banner.show{display:block}
     .alert-banner .banner-title{font-family:var(--display);font-size:0.82rem;color:var(--danger);margin-bottom:5px}
-
-    /* PRODUCT CARDS */
     .section-label{font-size:0.65rem;color:var(--muted);text-transform:uppercase;letter-spacing:1.5px;margin-bottom:10px;margin-top:4px}
     .products-list{display:flex;flex-direction:column;gap:9px}
     .product-card{background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:13px 15px;display:grid;grid-template-columns:1fr auto;align-items:center;gap:10px;position:relative;overflow:hidden;transition:border-color 0.2s}
@@ -76,75 +58,35 @@
     .progress-bar{height:3px;background:var(--border);border-radius:2px;margin-top:7px;overflow:hidden}
     .progress-fill{height:100%;border-radius:2px;transition:width 0.4s,background 0.3s}
     .ctrl-row{display:flex;flex-direction:column;align-items:center;gap:5px}
-    .ctrl-btn{width:34px;height:34px;border-radius:8px;border:1px solid var(--border);background:var(--surface2);color:var(--text);font-size:1.1rem;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all 0.15s;font-family:var(--mono)}
+    .ctrl-btn{width:36px;height:36px;border-radius:8px;border:1px solid var(--border);background:var(--surface2);color:var(--text);font-size:1.1rem;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all 0.15s;font-family:var(--mono)}
     .ctrl-btn:active{transform:scale(0.9)}.ctrl-btn:disabled{opacity:0.3;cursor:not-allowed;transform:none}
     .ctrl-btn.minus{color:var(--danger);border-color:#3d0a0a}.ctrl-btn.minus:hover{background:#2e0808}
     .ctrl-btn.plus{color:var(--ok);border-color:#0d2e1a}.ctrl-btn.plus:hover{background:#0d2e1a}
-
-    /* SKELETON */
     .skeleton{background:var(--surface);border:1px solid var(--border);border-radius:12px;height:82px;animation:shimmer 1.4s infinite;margin-bottom:9px}
     @keyframes shimmer{0%,100%{opacity:0.4}50%{opacity:0.8}}
-
-    /* BOTTOM BAR */
     .bottom-bar{margin-top:18px;display:flex;gap:8px}
     .btn-secondary{flex:1;background:var(--surface);border:1px solid var(--border);border-radius:8px;color:var(--muted);font-family:var(--mono);font-size:0.75rem;padding:10px;cursor:pointer;transition:all 0.2s;text-align:center}
     .btn-secondary:hover{border-color:var(--accent);color:var(--accent)}
     .btn-danger-sm{background:none;border:1px solid #3d0a0a;border-radius:6px;color:var(--danger);font-family:var(--mono);font-size:0.7rem;padding:5px 9px;cursor:pointer}
     .btn-danger-sm:hover{background:#2e0808}
-
-    /* STATS */
     .stats-row{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:14px}
     .stat-card{background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:11px 13px}
     .stat-val{font-size:1.5rem;font-weight:500;font-family:var(--display);line-height:1}
     .stat-lbl{font-size:0.6rem;color:var(--muted);margin-top:3px;text-transform:uppercase;letter-spacing:0.8px}
-
-    /* CONFIG ROW */
-    .config-row{background:var(--surface);border:1px solid var(--accent);border-radius:10px;padding:12px 15px;margin-bottom:14px;display:flex;align-items:center;justify-content:space-between;gap:12px}
-    .config-row-label{font-size:0.8rem}.config-row-sub{font-size:0.65rem;color:var(--muted);margin-top:2px}
-    .num-input{width:65px;background:var(--surface2);border:1px solid var(--accent);border-radius:8px;color:var(--accent);font-family:var(--display);font-weight:700;font-size:1.1rem;padding:7px 9px;outline:none;text-align:center}
-
-    /* PERSONS */
     .persons-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(155px,1fr));gap:7px;margin-bottom:14px}
     .person-chip{background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:9px 11px;cursor:pointer;transition:all 0.15s;display:flex;align-items:center;justify-content:space-between}
     .person-chip:hover{border-color:var(--accent)}.person-chip.done{border-color:var(--ok)}
     .p-name{font-size:0.75rem;font-weight:500;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
     .p-count{font-size:0.62rem;color:var(--muted);margin-top:1px}
-
-    /* PERSON DETAIL */
     .back-row{display:flex;align-items:center;gap:10px;margin-bottom:14px}
     .person-title{font-family:var(--display);font-size:1rem;font-weight:700}
-
-    /* SETTINGS */
-    #settings-panel{display:none;padding:16px;max-width:600px;margin:0 auto}
-    .set-section{margin-bottom:24px}
-    .set-section h3{font-family:var(--display);font-size:0.82rem;margin-bottom:10px;color:var(--muted);text-transform:uppercase;letter-spacing:1px}
-    .set-row{background:var(--surface);border:1px solid var(--border);border-radius:9px;padding:12px 14px;display:flex;align-items:center;justify-content:space-between;margin-bottom:7px;gap:10px}
-    .set-row-label{font-size:0.82rem}.set-row-sub{font-size:0.68rem;color:var(--muted);margin-top:2px}
-    .add-row{display:flex;gap:7px;margin-top:9px}
-    .add-row input{flex:1;background:var(--surface);border:1px solid var(--border);border-radius:7px;color:var(--text);font-family:var(--mono);font-size:0.78rem;padding:8px 11px;outline:none;transition:border-color 0.2s}
-    .add-row input:focus{border-color:var(--accent)}
-    .add-row button{background:var(--accent);border:none;border-radius:7px;color:#fff;font-family:var(--display);font-weight:700;font-size:0.78rem;padding:8px 12px;cursor:pointer;white-space:nowrap}
-
-    /* MODAL */
-    .modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,0.75);z-index:200;display:flex;align-items:center;justify-content:center;padding:20px}
-    .modal{background:var(--surface);border:1px solid var(--border);border-radius:14px;padding:22px;width:100%;max-width:400px}
-    .modal h3{font-family:var(--display);font-size:1.05rem;margin-bottom:14px}
-    .modal-actions{display:flex;gap:9px;margin-top:18px}
-    .btn-cancel{flex:1;background:var(--surface2);border:1px solid var(--border);border-radius:7px;color:var(--muted);font-family:var(--mono);font-size:0.82rem;padding:10px;cursor:pointer}
-    .btn-confirm{flex:1;background:var(--accent);border:none;border-radius:7px;color:#fff;font-family:var(--display);font-size:0.82rem;font-weight:700;padding:10px;cursor:pointer}
-
-    /* TOAST */
     #toast{position:fixed;bottom:22px;left:50%;transform:translateX(-50%) translateY(80px);background:var(--surface2);border:1px solid var(--border);border-radius:10px;padding:11px 18px;font-size:0.78rem;color:var(--text);transition:transform 0.3s cubic-bezier(0.34,1.56,0.64,1);z-index:999;white-space:nowrap;max-width:92vw;text-align:center}
     #toast.show{transform:translateX(-50%) translateY(0)}
-    #toast.success{border-color:var(--ok);color:var(--ok)}
-    #toast.error{border-color:var(--danger);color:var(--danger)}
-    #toast.warning{border-color:var(--warn);color:var(--warn)}
-
-    @media(min-width:600px){header{padding:14px 24px}.tab-content,#settings-panel{padding:20px 28px}}
+    #toast.success{border-color:var(--ok);color:var(--ok)}#toast.error{border-color:var(--danger);color:var(--danger)}#toast.warning{border-color:var(--warn);color:var(--warn)}
+    @media(min-width:600px){header{padding:14px 24px}.tab-content{padding:20px 28px}}
   </style>
 </head>
 <body>
-
 <header>
   <div class="header-left">
     <div class="logo-circle">B</div>
@@ -156,150 +98,59 @@
   </div>
 </header>
 
-<!-- SETUP -->
 <div id="setup-screen">
   <h2>Configuration</h2>
   <p>Entre ton token Notion pour connecter l'app.</p>
-  <div class="field">
-    <label>Token Notion</label>
-    <input type="password" id="input-token" placeholder="ntn_xxxxxxxxxxxx" autocomplete="off"/>
-  </div>
+  <div class="field"><label>Token Notion</label><input type="password" id="input-token" placeholder="ntn_xxxxxxxxxxxx" autocomplete="off"/></div>
   <button class="btn-primary" id="btn-connect">Connecter →</button>
   <div id="error-msg">❌ Impossible de se connecter. Vérifie ton token.</div>
-  <div class="help-box">
-    <strong>Token</strong> : <a href="https://www.notion.so/my-integrations" target="_blank">notion.so/my-integrations</a> → copie le secret <code style="background:#2a2a2a;padding:2px 5px;border-radius:3px">ntn_xxx...</code><br><br>
-    <strong>⚠️ Ne partage jamais ton token publiquement.</strong>
-  </div>
+  <div class="help-box"><strong>Token</strong> : <a href="https://www.notion.so/my-integrations" target="_blank">notion.so/my-integrations</a> → copie le secret <code style="background:#2a2a2a;padding:2px 5px;border-radius:3px">ntn_xxx...</code><br><br><strong>⚠️ Ne partage jamais ton token.</strong></div>
 </div>
 
-<!-- APP -->
 <div id="app-screen">
   <div class="tabs-bar">
     <button class="tab active" data-tab="shared">📦 Stock partagé</button>
-    <button class="tab" data-tab="indiv">🧴 Stock individuel</button>
-    <button class="tab" data-tab="persons">👥 Personnes</button>
+    <button class="tab" data-tab="persons">👥 Stock individuel</button>
   </div>
 
-  <!-- ═══ STOCK PARTAGÉ ═══ -->
+  <!-- STOCK PARTAGÉ -->
   <div id="view-shared" class="tab-content">
-    <div class="alert-banner" id="shared-alert">
-      <div class="banner-title">⚠️ Produits à commander</div>
-      <div id="shared-alert-list"></div>
-    </div>
-    <div class="section-label">5 produits — stock global</div>
-    <div class="products-list" id="shared-list">
-      <div class="skeleton"></div><div class="skeleton"></div><div class="skeleton"></div>
-    </div>
+    <div class="alert-banner" id="shared-alert"><div class="banner-title">⚠️ Produits à commander</div><div id="shared-alert-list"></div></div>
+    <div class="section-label">Produits communs — stock global</div>
+    <div class="products-list" id="shared-list"><div class="skeleton"></div><div class="skeleton"></div><div class="skeleton"></div></div>
     <div class="bottom-bar">
       <button class="btn-secondary" id="btn-refresh">↻ Actualiser</button>
       <button class="btn-secondary" id="btn-notion">Notion ↗</button>
     </div>
   </div>
 
-  <!-- ═══ STOCK INDIVIDUEL ═══ -->
-  <div id="view-indiv" class="tab-content" style="display:none">
-    <div class="alert-banner" id="indiv-alert">
-      <div class="banner-title">⚠️ Produits à renouveler</div>
-      <div id="indiv-alert-list"></div>
-    </div>
-    <div class="config-row">
-      <div>
-        <div class="config-row-label">Produits par personne</div>
-        <div class="config-row-sub" id="indiv-total-hint">Stock total = <span id="indiv-total-calc">—</span></div>
-      </div>
-      <input type="number" class="num-input" id="qty-per-person" value="2" min="1" max="99"/>
-    </div>
-    <div class="stats-row">
-      <div class="stat-card"><div class="stat-val" id="stat-persons">—</div><div class="stat-lbl">Personnes</div></div>
-      <div class="stat-card"><div class="stat-val" id="stat-given">0</div><div class="stat-lbl">Donnés</div></div>
-      <div class="stat-card"><div class="stat-val" id="stat-remaining" style="color:var(--warn)">—</div><div class="stat-lbl">Restants</div></div>
-    </div>
-    <div class="section-label">9 produits — stock individuel</div>
-    <div class="products-list" id="indiv-list">
-      <div class="skeleton"></div><div class="skeleton"></div><div class="skeleton"></div>
-    </div>
-    <div class="bottom-bar">
-      <button class="btn-secondary" id="btn-refresh-indiv">↻ Actualiser</button>
-      <button class="btn-secondary" id="btn-recalc-indiv">⟳ Recalculer totaux</button>
-    </div>
-  </div>
-
-  <!-- ═══ PERSONNES ═══ -->
+  <!-- PERSONNES -->
   <div id="view-persons" class="tab-content" style="display:none">
-    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px">
-      <div class="section-label" style="margin:0">Clique sur une personne pour voir son historique</div>
-      <button class="btn-secondary" style="flex:0;white-space:nowrap;padding:7px 11px;font-size:0.7rem" id="btn-add-person-tab">+ Ajouter</button>
+    <div class="stats-row">
+      <div class="stat-card"><div class="stat-val" id="stat-total-persons">—</div><div class="stat-lbl">Personnes</div></div>
+      <div class="stat-card"><div class="stat-val" id="stat-total-given" style="color:var(--accent)">—</div><div class="stat-lbl">Total donné</div></div>
+      <div class="stat-card"><div class="stat-val" id="stat-completed" style="color:var(--ok)">—</div><div class="stat-lbl">Complétés</div></div>
     </div>
-    <div class="persons-grid" id="persons-grid"></div>
+    <div class="section-label">Clique sur une personne pour gérer son stock</div>
+    <div class="persons-grid" id="persons-grid"><div class="skeleton" style="height:52px"></div><div class="skeleton" style="height:52px"></div><div class="skeleton" style="height:52px"></div></div>
+    <div class="bottom-bar"><button class="btn-secondary" id="btn-refresh-persons">↻ Actualiser</button></div>
   </div>
 
-  <!-- ═══ DÉTAIL PERSONNE ═══ -->
+  <!-- DÉTAIL PERSONNE -->
   <div id="view-person-detail" class="tab-content" style="display:none">
     <div class="back-row">
       <button class="btn-secondary" style="flex:0;padding:7px 11px;font-size:0.72rem" onclick="switchTab('persons')">← Retour</button>
       <div class="person-title" id="detail-name"></div>
     </div>
     <div class="stats-row">
-      <div class="stat-card"><div class="stat-val" id="detail-given" style="color:var(--accent)">0</div><div class="stat-lbl">Total donné</div></div>
-      <div class="stat-card"><div class="stat-val" id="detail-complete">0/9</div><div class="stat-lbl">Complétés</div></div>
-      <div class="stat-card"><div class="stat-val" id="detail-quota">2</div><div class="stat-lbl">Quota/produit</div></div>
+      <div class="stat-card"><div class="stat-val" id="detail-total" style="color:var(--accent)">0</div><div class="stat-lbl">Total donné</div></div>
+      <div class="stat-card"><div class="stat-val" id="detail-complete-count">0/9</div><div class="stat-lbl">Complétés</div></div>
+      <div class="stat-card"><div class="stat-val" id="detail-last-update" style="font-size:0.9rem">—</div><div class="stat-lbl">Màj</div></div>
     </div>
-    <div class="section-label">Compteur individuel</div>
+    <div class="section-label">Produits individuels</div>
     <div class="products-list" id="detail-list"></div>
     <div class="bottom-bar">
-      <button class="btn-secondary" id="btn-reset-person">↺ Reset compteur</button>
-      <button class="btn-danger-sm" style="flex:1" id="btn-delete-person">🗑 Supprimer</button>
-    </div>
-  </div>
-
-  <!-- ═══ PARAMÈTRES ═══ -->
-  <div id="settings-panel">
-    <div class="set-section">
-      <h3>Stock partagé — produits</h3>
-      <div id="set-shared-list"></div>
-      <div class="add-row">
-        <input type="text" id="new-shared-name" placeholder="Nouveau produit partagé..."/>
-        <button id="btn-add-shared">+ Ajouter</button>
-      </div>
-    </div>
-    <div class="set-section">
-      <h3>Stock individuel — produits</h3>
-      <div id="set-indiv-list"></div>
-      <div class="add-row">
-        <input type="text" id="new-indiv-name" placeholder="Nouveau produit individuel..."/>
-        <button id="btn-add-indiv">+ Ajouter</button>
-      </div>
-    </div>
-    <div class="set-section">
-      <h3>Personnes</h3>
-      <div id="set-persons-list"></div>
-      <div class="add-row">
-        <input type="text" id="new-person-name" placeholder="Nom prénom..."/>
-        <button id="btn-add-person-set">+ Ajouter</button>
-      </div>
-    </div>
-    <div class="set-section">
-      <h3>Danger zone</h3>
-      <div class="set-row">
-        <div><div class="set-row-label">Reset stock individuel</div><div class="set-row-sub">Remet tous les compteurs et stocks à 0 (recalcul auto)</div></div>
-        <button class="btn-danger-sm" id="btn-reset-indiv-all">Reset</button>
-      </div>
-      <div class="set-row">
-        <div><div class="set-row-label">Se déconnecter</div></div>
-        <button class="btn-danger-sm" id="btn-logout">Logout</button>
-      </div>
-    </div>
-  </div>
-</div>
-
-<!-- MODAL -->
-<div id="modal-person" class="modal-overlay" style="display:none">
-  <div class="modal">
-    <h3>👤 Nouvelle personne</h3>
-    <div class="field"><label>Nom complet</label><input type="text" id="modal-person-name" placeholder="Ex: DUPONT Marie"/></div>
-    <div class="modal-actions">
-      <button class="btn-cancel" id="modal-cancel">Annuler</button>
-      <button class="btn-confirm" id="modal-confirm">Créer</button>
+      <button class="btn-secondary" id="btn-reset-person">↺ Reset à 0</button>
     </div>
   </div>
 </div>
@@ -307,118 +158,96 @@
 <div id="toast"></div>
 
 <script>
-// ═══════════════════════════════════════════
-// CONFIG
-// ═══════════════════════════════════════════
-const DB_SHARED_ID = '5fa77d9813c08353941c01d42d74d891'; // base Notion unique
-const NOTION_PAGE  = 'https://app.notion.com/p/b4177d9813c083f5afe5813b3e54ecda';
+// ══════════════════════════════════════
+// CONFIG — IDs des deux bases Notion
+// ══════════════════════════════════════
+const DB_SHARED   = '5fa77d9813c08353941c01d42d74d891'; // Stock partagé (5 produits)
+const DB_PERSONS  = '30ffc218bf4942a184546930 06e9303f'.replace(/ /g,''); // Stock individuel (38 personnes)
+const NOTION_PAGE = 'https://app.notion.com/p/b4177d9813c083f5afe5813b3e54ecda';
 
-// IDs des 9 produits individuels créés dans Notion
-const INDIV_PRODUCT_IDS = [
-  '37477d9813c0811db14dcb51c0a82403', // Brosse à dent
-  '37477d9813c081f09245df5aa661c8ca', // Crème de corps
-  '37477d9813c08193b4daeab795ab13bc', // Dentifrice
-  '37477d9813c0813bb8afc61ecbf2e5c6', // Déodorant
-  '37477d9813c0813681a2fdd65073a295', // Gel douche
-  '37477d9813c081d2b2d3dda57f4919ed', // Lessive
-  '37477d9813c08160affbe4482163c3f2', // Savon dur
-  '37477d9813c081faa3f8f422008d0135', // Serviettes hygiéniques
-  '37477d9813c08160bf9ffc5d1a4c6116', // Shampoing
-];
+// Noms des 9 colonnes produits dans la base personnes
+const INDIV_COLS = ['Brosse à dent','Crème de corps','Dentifrice','Déodorant','Gel douche','Lessive','Savon dur','Serviettes hygiéniques','Shampoing'];
 
-const DEFAULT_PERSONS = [
-  "Lea Ida","TIBENG Destine Ngwe","DOUMOUBYA Seydou","ZIYAMA JOAO Graciana",
-  "SIDIBE Sakoba","BALDE Houssainatou","KANTE Abdoul Said","CONTE Mohamed Mounir",
-  "SONKO Muhammed Alim","DIALLO Mamadou Abdoulaye Cherif","HABA Michel","DIAKATE Amadou",
-  "KANU Abdulai","ABSHIR HASSAN Abdifitah","FOFANA Zara","DIALLO Mamadou Aliou",
-  "CAMARA Abdourahmane","NASERI Gulzar","MOHAMOUD Ifrah Nur","JALLOW Alhassane",
-  "DIALLO Alpha","TRAORE Kerfala","BARRY Hassanatou","DIABATE Famoro",
-  "TRAORE Mohammed Fadel","DEMY Ibrahim","BETE ASSOGO Jacqueline Arlette","BAYOUR Sekou",
-  "KEUMENI Zavira Stelia","LELEBE Clauvine","MWAMBA MATOMENE Belle-vida","HABA Anathol",
-  "BALDE Thierno Oury","DAGO Jean","FOTSO Leonel","LAMAH Cécé Simon",
-  "DJIMOU TOUOFO Hermar","AMRE Steven"
-];
+// IDs des produits individuels dans la base stock (pour décrémenter le stock global)
+const INDIV_STOCK_IDS = {
+  'Brosse à dent':          '37477d9813c0811db14dcb51c0a82403',
+  'Crème de corps':         '37477d9813c081f09245df5aa661c8ca',
+  'Dentifrice':             '37477d9813c08193b4daeab795ab13bc',
+  'Déodorant':              '37477d9813c0813bb8afc61ecbf2e5c6',
+  'Gel douche':             '37477d9813c0813681a2fdd65073a295',
+  'Lessive':                '37477d9813c081d2b2d3dda57f4919ed',
+  'Savon dur':              '37477d9813c08160affbe4482163c3f2',
+  'Serviettes hygiéniques': '37477d9813c081faa3f8f422008d0135',
+  'Shampoing':              '37477d9813c08160bf9ffc5d1a4c6116',
+};
 
-// ═══════════════════════════════════════════
+// ══════════════════════════════════════
 // STATE
-// ═══════════════════════════════════════════
+// ══════════════════════════════════════
 let TOKEN = '';
-let sharedProducts = []; // produits stock partagé (5 anciens)
-let indivProducts  = []; // produits stock individuel (9 nouveaux)
-let persons = [];
-let currentPersonIdx = -1;
-let qtyPerPerson = 2;
+let sharedProducts = [];
+let indivStocks    = {}; // pageId → {name, dispo, total}
+let persons        = []; // [{id, pageId, name, stocks:{col:qty}}]
+let currentPersonId = null;
 
-// ═══════════════════════════════════════════
-// PERSISTENCE
-// ═══════════════════════════════════════════
-function loadState(){
-  qtyPerPerson = parseInt(localStorage.getItem('sm_qty') || '2');
-  const saved = localStorage.getItem('sm_persons');
-  if(saved){
-    persons = JSON.parse(saved);
-  } else {
-    persons = DEFAULT_PERSONS.map(n => ({name:n, stocks:{}}));
-    saveState();
-  }
-}
-function saveState(){
-  localStorage.setItem('sm_persons', JSON.stringify(persons));
-  localStorage.setItem('sm_qty', String(qtyPerPerson));
-}
-
-// ═══════════════════════════════════════════
-// API PROXY
-// ═══════════════════════════════════════════
-async function notionReq(endpoint, method='GET', body=null){
-  const url = `/api/notion?endpoint=${encodeURIComponent(endpoint)}`;
-  const opts = {
+// ══════════════════════════════════════
+// API
+// ══════════════════════════════════════
+async function api(endpoint, method='GET', body=null){
+  const res = await fetch(`/api/notion?endpoint=${encodeURIComponent(endpoint)}`,{
     method,
-    headers:{'Authorization':`Bearer ${TOKEN}`,'Notion-Version':'2022-06-28','Content-Type':'application/json'}
-  };
-  if(body) opts.body = JSON.stringify(body);
-  const res = await fetch(url, opts);
+    headers:{'Authorization':`Bearer ${TOKEN}`,'Notion-Version':'2022-06-28','Content-Type':'application/json'},
+    body: body ? JSON.stringify(body) : undefined
+  });
   const data = await res.json();
-  if(!res.ok) throw new Error(data.message || 'Erreur API');
+  if(!res.ok) throw new Error(data.message||'Erreur API');
   return data;
 }
 
-// ═══════════════════════════════════════════
+// ══════════════════════════════════════
+// FETCH SHARED
+// ══════════════════════════════════════
+async function fetchShared(){
+  const data = await api(`databases/${DB_SHARED}/query`,'POST',{sorts:[{property:'Nom',direction:'ascending'}]});
+  const allPages = data.results.map(p=>({
+    id: p.id,
+    name: p.properties['Nom']?.title?.[0]?.plain_text||'?',
+    dispo: p.properties['Quantité dispo']?.number??0,
+    total: p.properties['Quantité']?.number??10,
+    lastEdit: p.properties['Dernière utilisation']?.date?.start||null
+  }));
+  // Sépare partagé vs individuel
+  const indivIds = Object.values(INDIV_STOCK_IDS);
+  sharedProducts = allPages.filter(p=>!indivIds.includes(p.id));
+  // Met à jour indivStocks
+  allPages.filter(p=>indivIds.includes(p.id)).forEach(p=>{
+    indivStocks[p.id] = p;
+  });
+}
+
+// ══════════════════════════════════════
+// FETCH PERSONS
+// ══════════════════════════════════════
+async function fetchPersons(){
+  const data = await api(`databases/${DB_PERSONS}/query`,'POST',{sorts:[{property:'Nom',direction:'ascending'}]});
+  persons = data.results.map(p=>{
+    const stocks = {};
+    INDIV_COLS.forEach(col=>{ stocks[col] = p.properties[col]?.number??0; });
+    return { id: p.id, name: p.properties['Nom']?.title?.[0]?.plain_text||'?', stocks };
+  });
+}
+
+// ══════════════════════════════════════
 // FETCH ALL
-// ═══════════════════════════════════════════
+// ══════════════════════════════════════
 async function fetchAll(){
   setSyncStatus('loading','Chargement...');
   try{
-    const data = await notionReq(`databases/${DB_SHARED_ID}/query`,'POST',{
-      sorts:[{property:'Nom',direction:'ascending'}]
-    });
-    const all = data.results.map(p => ({
-      id: p.id,
-      name: p.properties['Nom']?.title?.[0]?.plain_text || '?',
-      dispo: p.properties['Quantité dispo']?.number ?? 0,
-      total: p.properties['Quantité']?.number ?? 10,
-      lastEdit: p.properties['Dernière utilisation']?.date?.start || null
-    }));
-
-    // Sépare partagé vs individuel selon les IDs connus
-    indivProducts  = all.filter(p => INDIV_PRODUCT_IDS.includes(p.id));
-    sharedProducts = all.filter(p => !INDIV_PRODUCT_IDS.includes(p.id));
-
-    // Init stocks personnes pour nouveaux produits individuels
-    persons.forEach(p => {
-      indivProducts.forEach(prod => {
-        if(p.stocks[prod.id] === undefined) p.stocks[prod.id] = 0;
-      });
-    });
-    saveState();
-
+    await Promise.all([fetchShared(), fetchPersons()]);
     renderShared();
-    renderIndiv();
     renderPersonsGrid();
-    if(currentPersonIdx >= 0) renderPersonDetail();
-    updateIndivStats();
-    checkAlerts();
-    renderSettingsLists();
+    if(currentPersonId) renderPersonDetail();
+    checkSharedAlerts();
     setSyncStatus('ok','Synchronisé');
   }catch(e){
     setSyncStatus('error','Erreur');
@@ -426,443 +255,219 @@ async function fetchAll(){
   }
 }
 
-// ═══════════════════════════════════════════
-// HELPERS
-// ═══════════════════════════════════════════
-function getLevel(dispo, total){
-  if(dispo <= 0) return 'danger';
-  const ratio = total > 0 ? dispo/total : 1;
-  if(ratio <= 0.15 || dispo <= 3) return 'warn';
-  return 'ok';
-}
-function badge(level){
-  if(level==='ok') return '<span class="product-badge badge-ok">✅ OK</span>';
-  if(level==='warn') return '<span class="product-badge badge-warn">🟠 Bas</span>';
-  return '<span class="product-badge badge-danger">🔴 URGENT</span>';
-}
-function pct(dispo,total){ return total>0?Math.max(0,Math.min(100,(dispo/total)*100)):0; }
-function fillColor(level){ return level==='ok'?'var(--ok)':level==='warn'?'var(--warn)':'var(--danger)'; }
-function dateStr(d){ return d?new Date(d).toLocaleDateString('fr-FR'):'—'; }
-
-// ═══════════════════════════════════════════
+// ══════════════════════════════════════
 // RENDER STOCK PARTAGÉ
-// ═══════════════════════════════════════════
+// ══════════════════════════════════════
+function lvl(dispo,total){ return dispo<=0?'danger':(total>0&&dispo/total<=0.15)||dispo<=3?'warn':'ok'; }
+function bdg(l){ return l==='ok'?'<span class="product-badge badge-ok">✅ OK</span>':l==='warn'?'<span class="product-badge badge-warn">🟠 Bas</span>':'<span class="product-badge badge-danger">🔴 URGENT</span>'; }
+function fc(l){ return l==='ok'?'var(--ok)':l==='warn'?'var(--warn)':'var(--danger)'; }
+
 function renderShared(){
   const list = document.getElementById('shared-list');
-  if(!sharedProducts.length){
-    list.innerHTML='<p style="color:var(--muted);font-size:0.8rem;text-align:center;padding:20px">Aucun produit partagé.</p>';
-    return;
-  }
-  list.innerHTML = sharedProducts.map(p => {
-    const lv = getLevel(p.dispo, p.total);
-    return `<div class="product-card ${lv}">
+  list.innerHTML = sharedProducts.map(p=>{
+    const l = lvl(p.dispo,p.total);
+    const pc = p.total>0?Math.max(0,Math.min(100,p.dispo/p.total*100)):0;
+    return `<div class="product-card ${l}">
       <div>
         <div class="product-name">${p.name}</div>
         <div class="product-meta">
-          <div>
-            <span class="product-qty ${lv}">${p.dispo}</span>
-            <span class="product-total"> / ${p.total}</span>
-          </div>
-          <div>${badge(lv)}<div class="product-sub">Utilisé le ${dateStr(p.lastEdit)}</div></div>
+          <div><span class="product-qty ${l}">${p.dispo}</span><span class="product-total"> / ${p.total}</span></div>
+          <div>${bdg(l)}<div class="product-sub">${p.lastEdit?'Utilisé le '+new Date(p.lastEdit).toLocaleDateString('fr-FR'):'Jamais utilisé'}</div></div>
         </div>
-        <div class="progress-bar"><div class="progress-fill" style="width:${pct(p.dispo,p.total)}%;background:${fillColor(lv)}"></div></div>
+        <div class="progress-bar"><div class="progress-fill" style="width:${pc}%;background:${fc(l)}"></div></div>
       </div>
       <div class="ctrl-row">
-        <button class="ctrl-btn plus" onclick="updateProduct('shared','${p.id}',1)">+</button>
-        <button class="ctrl-btn minus" onclick="updateProduct('shared','${p.id}',-1)" ${p.dispo<=0?'disabled':''}>−</button>
+        <button class="ctrl-btn plus" onclick="updateShared('${p.id}',1)">+</button>
+        <button class="ctrl-btn minus" onclick="updateShared('${p.id}',-1)" ${p.dispo<=0?'disabled':''}>−</button>
       </div>
     </div>`;
   }).join('');
 }
 
-// ═══════════════════════════════════════════
-// RENDER STOCK INDIVIDUEL
-// ═══════════════════════════════════════════
-function renderIndiv(){
-  const list = document.getElementById('indiv-list');
-  // Recalcule total depuis qtyPerPerson × nb personnes
-  indivProducts.forEach(p => { p.total = persons.length * qtyPerPerson; });
-
-  if(!indivProducts.length){
-    list.innerHTML='<p style="color:var(--muted);font-size:0.8rem;text-align:center;padding:20px">Aucun produit individuel.</p>';
-    return;
-  }
-  list.innerHTML = indivProducts.map(p => {
-    const lv = getLevel(p.dispo, p.total);
-    const given = persons.reduce((s,per)=>s+(per.stocks[p.id]||0),0);
-    return `<div class="product-card ${lv}">
-      <div>
-        <div class="product-name">${p.name}</div>
-        <div class="product-meta">
-          <div>
-            <span class="product-qty ${lv}">${p.dispo}</span>
-            <span class="product-total"> / ${p.total}</span>
-          </div>
-          <div>${badge(lv)}<div class="product-sub">Donné: ${given} — Reste: ${p.dispo}</div></div>
-        </div>
-        <div class="progress-bar"><div class="progress-fill" style="width:${pct(p.dispo,p.total)}%;background:${fillColor(lv)}"></div></div>
-      </div>
-      <div class="ctrl-row">
-        <button class="ctrl-btn plus" onclick="updateProduct('indiv','${p.id}',1)" title="+1 au stock">+</button>
-        <button class="ctrl-btn minus" onclick="updateProduct('indiv','${p.id}',-1)" ${p.dispo<=0?'disabled':''} title="-1 au stock">−</button>
-      </div>
-    </div>`;
-  }).join('');
-  updateIndivStats();
-}
-
-function updateIndivStats(){
-  const nbP = persons.length;
-  const qty = qtyPerPerson;
-  document.getElementById('stat-persons').textContent = nbP;
-  document.getElementById('indiv-total-calc').textContent = `${nbP} × ${qty} = ${nbP*qty} par produit`;
-
-  const totalGiven = persons.reduce((s,p)=>s+Object.values(p.stocks||{}).reduce((a,b)=>a+(b||0),0),0);
-  const totalRemaining = indivProducts.reduce((s,p)=>s+p.dispo,0);
-  document.getElementById('stat-given').textContent = totalGiven;
-  document.getElementById('stat-remaining').textContent = totalRemaining;
-  document.getElementById('qty-per-person').value = qty;
-}
-
-// ═══════════════════════════════════════════
-// UPDATE PRODUCT (stock partagé ou individuel)
-// ═══════════════════════════════════════════
-async function updateProduct(type, pageId, delta){
-  const arr = type==='shared' ? sharedProducts : indivProducts;
-  const p = arr.find(x=>x.id===pageId);
+async function updateShared(pageId, delta){
+  const p = sharedProducts.find(x=>x.id===pageId);
   if(!p) return;
-  const newQty = Math.max(0, p.dispo + delta);
-  p.dispo = newQty;
-  if(type==='shared') renderShared(); else renderIndiv();
+  p.dispo = Math.max(0,p.dispo+delta);
+  renderShared();
   setSyncStatus('loading','Sync...');
   try{
-    await notionReq(`pages/${pageId}`,'PATCH',{properties:{
-      'Quantité dispo':{number:newQty},
+    await api(`pages/${pageId}`,'PATCH',{properties:{
+      'Quantité dispo':{number:p.dispo},
       'Dernière utilisation':{date:{start:new Date().toISOString().split('T')[0]}}
     }});
     setSyncStatus('ok','Synchronisé');
-    checkAlerts();
-    const lv = getLevel(newQty, p.total);
-    if(lv==='danger') showToast(`🔴 ${p.name} — Rupture !`,'error');
-    else if(lv==='warn') showToast(`🟠 ${p.name} — Stock bas (${newQty})`,'warning');
+    checkSharedAlerts();
+    const l=lvl(p.dispo,p.total);
+    if(l==='danger') showToast(`🔴 ${p.name} — Rupture !`,'error');
+    else if(l==='warn') showToast(`🟠 ${p.name} — Stock bas (${p.dispo})`,'warning');
     else showToast(`${delta>0?'📦 +1':'✓ −1'} ${p.name}`,'success');
   }catch(e){
-    p.dispo -= delta;
-    if(type==='shared') renderShared(); else renderIndiv();
-    setSyncStatus('error','Erreur');
-    showToast('❌ '+e.message,'error');
+    p.dispo-=delta; renderShared(); setSyncStatus('error','Erreur'); showToast('❌ '+e.message,'error');
   }
 }
 
-// ═══════════════════════════════════════════
-// PERSONNE — GRID
-// ═══════════════════════════════════════════
+function checkSharedAlerts(){
+  const crit = sharedProducts.filter(p=>lvl(p.dispo,p.total)!=='ok');
+  const b = document.getElementById('shared-alert');
+  if(crit.length){
+    document.getElementById('shared-alert-list').innerHTML=crit.map(p=>`${p.dispo<=0?'🔴':'🟠'} <strong>${p.name}</strong> — ${p.dispo}/${p.total}`).join('<br>');
+    b.classList.add('show');
+  } else b.classList.remove('show');
+}
+
+// ══════════════════════════════════════
+// RENDER PERSONNES GRID
+// ══════════════════════════════════════
 function renderPersonsGrid(){
+  const total = persons.length;
+  const totalGiven = persons.reduce((s,p)=>s+Object.values(p.stocks).reduce((a,b)=>a+b,0),0);
+  const completed = persons.filter(p=>INDIV_COLS.every(c=>p.stocks[c]>=2)).length;
+  document.getElementById('stat-total-persons').textContent = total;
+  document.getElementById('stat-total-given').textContent = totalGiven;
+  document.getElementById('stat-completed').textContent = completed;
+
   const grid = document.getElementById('persons-grid');
-  grid.innerHTML = persons.map((p,i) => {
-    const given = Object.values(p.stocks||{}).reduce((a,b)=>a+(b||0),0);
-    const maxPossible = indivProducts.length * qtyPerPerson;
-    const isDone = maxPossible > 0 && given >= maxPossible;
-    return `<div class="person-chip ${isDone?'done':''}" onclick="openPersonDetail(${i})">
-      <div style="min-width:0">
-        <div class="p-name">${p.name}</div>
-        <div class="p-count">${given}/${maxPossible} produits</div>
-      </div>
-      <span style="font-size:0.9rem;flex-shrink:0">${isDone?'✅':'→'}</span>
+  grid.innerHTML = persons.map(p=>{
+    const given = Object.values(p.stocks).reduce((a,b)=>a+b,0);
+    const done = INDIV_COLS.every(c=>p.stocks[c]>=2);
+    return `<div class="person-chip ${done?'done':''}" onclick="openDetail('${p.id}')">
+      <div style="min-width:0"><div class="p-name">${p.name}</div><div class="p-count">${given} / ${INDIV_COLS.length*2} produits</div></div>
+      <span style="font-size:0.9rem;flex-shrink:0">${done?'✅':'→'}</span>
     </div>`;
   }).join('');
 }
 
-// ═══════════════════════════════════════════
-// PERSONNE — DÉTAIL
-// ═══════════════════════════════════════════
-async function openPersonDetail(idx){
-  currentPersonIdx = idx;
-  const p = persons[idx];
-  document.getElementById('detail-name').textContent = '👤 ' + p.name;
-  switchTab('person-detail');
-  if(!indivProducts.length){ await fetchAll(); }
+// ══════════════════════════════════════
+// DÉTAIL PERSONNE
+// ══════════════════════════════════════
+function openDetail(personId){
+  currentPersonId = personId;
+  const p = persons.find(x=>x.id===personId);
+  document.getElementById('detail-name').textContent = '👤 '+p.name;
   renderPersonDetail();
+  switchTab('person-detail');
 }
 
 function renderPersonDetail(){
-  if(currentPersonIdx < 0) return;
-  const person = persons[currentPersonIdx];
+  const p = persons.find(x=>x.id===currentPersonId);
+  if(!p) return;
 
-  const totalGiven = Object.values(person.stocks||{}).reduce((a,b)=>a+(b||0),0);
-  const completed = indivProducts.filter(p=>(person.stocks[p.id]||0)>=qtyPerPerson).length;
-  document.getElementById('detail-given').textContent = totalGiven;
-  document.getElementById('detail-complete').textContent = `${completed}/${indivProducts.length}`;
-  document.getElementById('detail-quota').textContent = qtyPerPerson;
+  const totalGiven = Object.values(p.stocks).reduce((a,b)=>a+b,0);
+  const completed = INDIV_COLS.filter(c=>p.stocks[c]>=2).length;
+  document.getElementById('detail-total').textContent = totalGiven;
+  document.getElementById('detail-complete-count').textContent = `${completed}/${INDIV_COLS.length}`;
+  document.getElementById('detail-last-update').textContent = new Date().toLocaleDateString('fr-FR');
 
-  const container = document.getElementById('detail-list');
-  if(!indivProducts.length){
-    container.innerHTML='<p style="color:var(--muted);font-size:0.8rem">Chargement...</p>';
-    return;
-  }
-  container.innerHTML = indivProducts.map(p => {
-    const taken = person.stocks[p.id] || 0;
-    const canPlus = p.dispo > 0; // pas de limite max côté personne, juste le stock
-    const canMinus = taken > 0;
-    const isDone = taken >= qtyPerPerson;
-    const lv = getLevel(p.dispo, p.total);
+  document.getElementById('detail-list').innerHTML = INDIV_COLS.map(col=>{
+    const qty    = p.stocks[col] || 0;
+    const stockP = indivStocks[INDIV_STOCK_IDS[col]];
+    const dispo  = stockP ? stockP.dispo : 0;
+    const total  = stockP ? stockP.total : 0;
+    const done   = qty >= 2;
+    const l      = dispo<=0?'danger':dispo<=10?'warn':'ok';
+    const pc     = total>0?Math.max(0,Math.min(100,dispo/total*100)):0;
 
-    return `<div class="product-card ${lv}" style="${isDone?'border-color:#0d2e1a':''}">
+    return `<div class="product-card ${l}" style="${done?'border-color:#0d2e1a':''}">
       <div>
-        <div class="product-name">${p.name} ${isDone?'<span style="font-size:0.7rem;color:var(--ok)">✓ fait</span>':''}</div>
+        <div class="product-name">${col} ${done?'<span style="font-size:0.7rem;color:var(--ok)">✓</span>':''}</div>
         <div class="product-meta">
-          <div>
-            <span class="product-qty ${lv}">${p.dispo}</span>
-            <span class="product-total"> restants</span>
-          </div>
-          <div>
-            <div class="product-sub">Donné à ${person.name.split(' ')[0]}: <strong style="color:${isDone?'var(--ok)':'var(--text)'}">${taken}</strong> <span style="color:var(--muted)">(quota: ${qtyPerPerson})</span></div>
-          </div>
+          <div><span class="product-qty ${l}">${dispo}</span><span class="product-total"> en stock</span></div>
+          <div>${bdg(l)}<div class="product-sub">Donné : <strong style="color:${done?'var(--ok)':'var(--text)'}">${qty}</strong></div></div>
         </div>
-        <div class="progress-bar"><div class="progress-fill" style="width:${pct(p.dispo,p.total)}%;background:${fillColor(lv)}"></div></div>
+        <div class="progress-bar"><div class="progress-fill" style="width:${pc}%;background:${fc(l)}"></div></div>
       </div>
       <div class="ctrl-row">
-        <button class="ctrl-btn plus" onclick="personGive(${currentPersonIdx},'${p.id}',1)" ${!canPlus?'disabled':''} title="Donner 1">+</button>
-        <button class="ctrl-btn minus" onclick="personGive(${currentPersonIdx},'${p.id}',-1)" ${!canMinus?'disabled':''} title="Annuler 1">−</button>
+        <button class="ctrl-btn plus" onclick="personGive('${p.id}','${col}',1)" ${dispo<=0?'disabled':''} title="Donner 1 → −1 du stock">+</button>
+        <button class="ctrl-btn minus" onclick="personGive('${p.id}','${col}',-1)" ${qty<=0?'disabled':''} title="Annuler (compteur only)">−</button>
       </div>
     </div>`;
   }).join('');
 }
 
-// ═══════════════════════════════════════════
-// PERSONNE — DONNER / REPRENDRE
-// + ajoute 1 au compteur perso ET −1 au stock individuel global
-// − enlève 1 au compteur perso SEULEMENT
-// ═══════════════════════════════════════════
-async function personGive(personIdx, productId, delta){
-  const person = persons[personIdx];
-  const p = indivProducts.find(x=>x.id===productId);
-  if(!person || !p) return;
+// ══════════════════════════════════════
+// DONNER / ANNULER
+// + → +1 compteur personne + −1 stock global Notion
+// − → −1 compteur personne seulement
+// ══════════════════════════════════════
+async function personGive(personId, col, delta){
+  const p = persons.find(x=>x.id===personId);
+  const stockPageId = INDIV_STOCK_IDS[col];
+  const stockP = indivStocks[stockPageId];
+  if(!p || !stockP) return;
 
-  if(delta > 0 && p.dispo <= 0){ showToast('🔴 Plus de stock disponible','error'); return; }
-  if(delta < 0 && (person.stocks[productId]||0) <= 0) return;
+  if(delta>0 && stockP.dispo<=0){ showToast('🔴 Plus de stock disponible','error'); return; }
+  if(delta<0 && (p.stocks[col]||0)<=0) return;
 
-  // Mise à jour locale
-  person.stocks[productId] = (person.stocks[productId]||0) + delta;
-
-  if(delta > 0){
-    // + : on soustrait 1 au stock global
-    p.dispo = Math.max(0, p.dispo - 1);
-  }
-  // − : on ne touche PAS au stock global, juste le compteur
-
-  saveState();
+  // Mise à jour locale immédiate
+  p.stocks[col] = (p.stocks[col]||0) + delta;
+  if(delta>0) stockP.dispo = Math.max(0, stockP.dispo-1);
   renderPersonDetail();
-  renderIndiv();
   renderPersonsGrid();
 
-  if(delta > 0){
-    // Sync Notion seulement si on a modifié le stock
-    setSyncStatus('loading','Sync...');
-    try{
-      await notionReq(`pages/${productId}`,'PATCH',{properties:{
-        'Quantité dispo':{number:p.dispo},
+  setSyncStatus('loading','Sync...');
+  try{
+    // 1. Mise à jour compteur personne dans Notion
+    await api(`pages/${personId}`,'PATCH',{properties:{[col]:{number:p.stocks[col]}}});
+
+    // 2. Si on donne (+), on décrémente aussi le stock global
+    if(delta>0){
+      await api(`pages/${stockPageId}`,'PATCH',{properties:{
+        'Quantité dispo':{number:stockP.dispo},
         'Dernière utilisation':{date:{start:new Date().toISOString().split('T')[0]}}
       }});
-      setSyncStatus('ok','Synchronisé');
-      checkAlerts();
-      showToast(`📦 ${p.name} → ${person.name.split(' ')[0]}`,'success');
-    }catch(e){
-      // Rollback
-      person.stocks[productId] -= delta;
-      p.dispo += 1;
-      saveState();
-      renderPersonDetail();
-      renderIndiv();
-      setSyncStatus('error','Erreur');
-      showToast('❌ '+e.message,'error');
     }
-  } else {
-    showToast(`↩ Annulé — ${p.name} pour ${person.name.split(' ')[0]}`,'success');
-  }
-}
-
-// ═══════════════════════════════════════════
-// QTY PER PERSON
-// ═══════════════════════════════════════════
-function onQtyChange(){
-  const v = parseInt(document.getElementById('qty-per-person').value) || 2;
-  if(v === qtyPerPerson) return;
-  qtyPerPerson = v;
-  saveState();
-  indivProducts.forEach(p => { p.total = persons.length * qtyPerPerson; });
-  renderIndiv();
-  renderPersonsGrid();
-  if(currentPersonIdx>=0) renderPersonDetail();
-  showToast(`Quota: ${qtyPerPerson}/personne — Total: ${persons.length*qtyPerPerson}`,'success');
-}
-
-async function recalcIndivTotals(){
-  const newTotal = persons.length * qtyPerPerson;
-  if(!confirm(`Mettre à jour Notion avec ${persons.length} × ${qtyPerPerson} = ${newTotal} ?`)) return;
-  setSyncStatus('loading','Recalcul...');
-  try{
-    for(const p of indivProducts){
-      p.total = newTotal;
-      await notionReq(`pages/${p.id}`,'PATCH',{properties:{'Quantité':{number:newTotal}}});
-    }
-    renderIndiv();
     setSyncStatus('ok','Synchronisé');
-    showToast(`✅ Totaux mis à jour : ${newTotal}`,'success');
+    const firstName = p.name.split(' ').pop();
+    showToast(delta>0?`📦 ${col} → ${firstName}`:`↩ Annulé — ${col}`,'success');
   }catch(e){
+    // Rollback
+    p.stocks[col] -= delta;
+    if(delta>0) stockP.dispo += 1;
+    renderPersonDetail();
+    renderPersonsGrid();
     setSyncStatus('error','Erreur');
     showToast('❌ '+e.message,'error');
   }
 }
 
-// ═══════════════════════════════════════════
-// ALERTS
-// ═══════════════════════════════════════════
-function checkAlerts(){
-  // Partagé
-  const sharedCrit = sharedProducts.filter(p=>getLevel(p.dispo,p.total)!=='ok');
-  const sharedBanner = document.getElementById('shared-alert');
-  if(sharedCrit.length){
-    document.getElementById('shared-alert-list').innerHTML = sharedCrit.map(p=>`${p.dispo<=0?'🔴':'🟠'} <strong>${p.name}</strong> — ${p.dispo}/${p.total}`).join('<br>');
-    sharedBanner.classList.add('show');
-  } else sharedBanner.classList.remove('show');
-
-  // Individuel
-  const indivCrit = indivProducts.filter(p=>getLevel(p.dispo,p.total)!=='ok');
-  const indivBanner = document.getElementById('indiv-alert');
-  if(indivCrit.length){
-    document.getElementById('indiv-alert-list').innerHTML = indivCrit.map(p=>`${p.dispo<=0?'🔴':'🟠'} <strong>${p.name}</strong> — ${p.dispo}/${p.total}`).join('<br>');
-    indivBanner.classList.add('show');
-  } else indivBanner.classList.remove('show');
-}
-
-// ═══════════════════════════════════════════
-// SETTINGS
-// ═══════════════════════════════════════════
-function renderSettingsLists(){
-  // Partagé
-  document.getElementById('set-shared-list').innerHTML = sharedProducts.map(p=>`
-    <div class="set-row">
-      <div><div class="set-row-label">${p.name}</div><div class="set-row-sub">${p.dispo}/${p.total}</div></div>
-      <div style="display:flex;gap:5px">
-        <button class="ctrl-btn plus" style="width:28px;height:28px;font-size:0.85rem" onclick="updateProduct('shared','${p.id}',1)">+</button>
-        <button class="ctrl-btn minus" style="width:28px;height:28px;font-size:0.85rem" onclick="updateProduct('shared','${p.id}',-1)" ${p.dispo<=0?'disabled':''}>−</button>
-      </div>
-    </div>`).join('');
-
-  // Individuel
-  document.getElementById('set-indiv-list').innerHTML = indivProducts.map(p=>`
-    <div class="set-row">
-      <div><div class="set-row-label">${p.name}</div><div class="set-row-sub">${p.dispo}/${p.total}</div></div>
-      <div style="display:flex;gap:5px">
-        <button class="ctrl-btn plus" style="width:28px;height:28px;font-size:0.85rem" onclick="updateProduct('indiv','${p.id}',1)">+</button>
-        <button class="ctrl-btn minus" style="width:28px;height:28px;font-size:0.85rem" onclick="updateProduct('indiv','${p.id}',-1)" ${p.dispo<=0?'disabled':''}>−</button>
-      </div>
-    </div>`).join('');
-
-  // Personnes
-  document.getElementById('set-persons-list').innerHTML = persons.map((p,i)=>`
-    <div class="set-row">
-      <div class="set-row-label">${p.name}</div>
-      <button class="btn-danger-sm" onclick="deletePerson(${i})">Suppr.</button>
-    </div>`).join('');
-}
-
-async function addProduct(type){
-  const inputId = type==='shared' ? 'new-shared-name' : 'new-indiv-name';
-  const input = document.getElementById(inputId);
-  const name = input.value.trim();
-  if(!name) return;
-  const newTotal = type==='indiv' ? persons.length * qtyPerPerson : 10;
-  setSyncStatus('loading','Création...');
-  try{
-    await notionReq('pages','POST',{parent:{database_id:DB_SHARED_ID},properties:{
-      'Nom':{title:[{text:{content:name}}]},
-      'Quantité':{number:newTotal},
-      'Quantité dispo':{number:newTotal},
-      "Seuil d'alerte":{number:Math.max(2,Math.ceil(newTotal*0.1))},
-      'Type':{select:{name:'Produit'}}
-    }});
-    input.value='';
-    showToast(`✅ ${name} ajouté`,'success');
-    await fetchAll();
-  }catch(e){
-    setSyncStatus('error','Erreur');
-    showToast('❌ '+e.message,'error');
-  }
-}
-
-function addPerson(name){
-  if(!name.trim()) return;
-  const stocks = {};
-  indivProducts.forEach(p=>{stocks[p.id]=0;});
-  persons.push({name:name.trim(), stocks});
-  saveState();
-  renderPersonsGrid();
-  renderSettingsLists();
-  updateIndivStats();
-  showToast(`👤 ${name} ajouté`,'success');
-}
-
-function deletePerson(idx){
-  if(!confirm(`Supprimer ${persons[idx].name} ?`)) return;
-  persons.splice(idx,1);
-  saveState();
-  renderPersonsGrid();
-  renderSettingsLists();
-  updateIndivStats();
-  if(currentPersonIdx === idx){ currentPersonIdx=-1; switchTab('persons'); }
-}
-
-async function resetIndivAll(){
-  const newTotal = persons.length * qtyPerPerson;
-  if(!confirm(`Remettre tous les stocks individuels à ${newTotal} et vider tous les compteurs ?`)) return;
+// ══════════════════════════════════════
+// RESET PERSONNE
+// ══════════════════════════════════════
+async function resetPerson(){
+  const p = persons.find(x=>x.id===currentPersonId);
+  if(!p || !confirm(`Remettre tous les compteurs de ${p.name} à 0 ?`)) return;
   setSyncStatus('loading','Reset...');
   try{
-    for(const p of indivProducts){
-      p.dispo = newTotal; p.total = newTotal;
-      await notionReq(`pages/${p.id}`,'PATCH',{properties:{'Quantité':{number:newTotal},'Quantité dispo':{number:newTotal}}});
-    }
-    persons.forEach(p=>{ indivProducts.forEach(prod=>{p.stocks[prod.id]=0;}); });
-    saveState();
-    renderIndiv();
+    const props = {};
+    INDIV_COLS.forEach(col=>{ props[col]={number:0}; p.stocks[col]=0; });
+    await api(`pages/${p.id}`,'PATCH',{properties:props});
+    renderPersonDetail();
     renderPersonsGrid();
-    if(currentPersonIdx>=0) renderPersonDetail();
     setSyncStatus('ok','Synchronisé');
-    showToast(`↺ Reset complet — ${newTotal} par produit`,'success');
+    showToast('↺ Compteurs remis à 0','success');
   }catch(e){
     setSyncStatus('error','Erreur');
     showToast('❌ '+e.message,'error');
   }
 }
 
-// ═══════════════════════════════════════════
+// ══════════════════════════════════════
 // TABS
-// ═══════════════════════════════════════════
-const VIEWS = ['shared','indiv','persons','person-detail'];
+// ══════════════════════════════════════
 function switchTab(tabId){
-  VIEWS.forEach(id=>{
-    const el = document.getElementById(`view-${id}`);
-    if(el) el.style.display = tabId===id ? 'block' : 'none';
+  ['shared','persons','person-detail'].forEach(id=>{
+    const el=document.getElementById(`view-${id}`);
+    if(el) el.style.display=tabId===id?'block':'none';
   });
-  document.getElementById('settings-panel').style.display = tabId==='settings' ? 'block' : 'none';
-  document.querySelectorAll('.tab').forEach(t=>t.classList.toggle('active', t.dataset.tab===tabId));
+  document.querySelectorAll('.tab').forEach(t=>t.classList.toggle('active',t.dataset.tab===tabId));
 }
 
-// ═══════════════════════════════════════════
+// ══════════════════════════════════════
 // UTILS
-// ═══════════════════════════════════════════
-function setSyncStatus(s,l){
-  document.getElementById('sync-dot').className=s;
-  document.getElementById('sync-label').textContent=l;
-}
-let toastTimer;
-function showToast(msg,type=''){
-  const t=document.getElementById('toast');
-  t.textContent=msg; t.className=`show ${type}`;
-  clearTimeout(toastTimer);
-  toastTimer=setTimeout(()=>{t.className='';},3000);
-}
+// ══════════════════════════════════════
+function setSyncStatus(s,l){ document.getElementById('sync-dot').className=s; document.getElementById('sync-label').textContent=l; }
+let _tt;
+function showToast(msg,type=''){ const t=document.getElementById('toast'); t.textContent=msg; t.className=`show ${type}`; clearTimeout(_tt); _tt=setTimeout(()=>{t.className='';},3000); }
 
 async function connect(){
   const token=document.getElementById('input-token').value.trim();
@@ -872,7 +477,7 @@ async function connect(){
   btn.disabled=true; btn.textContent='Connexion...';
   document.getElementById('error-msg').style.display='none';
   try{
-    await notionReq(`databases/${DB_SHARED_ID}/query`,'POST',{page_size:1});
+    await api(`databases/${DB_SHARED}/query`,'POST',{page_size:1});
     localStorage.setItem('sm_token',token);
     showApp();
   }catch(e){
@@ -888,81 +493,20 @@ function showApp(){
   fetchAll();
 }
 
-// ═══════════════════════════════════════════
+// ══════════════════════════════════════
 // INIT
-// ═══════════════════════════════════════════
+// ══════════════════════════════════════
 window.addEventListener('DOMContentLoaded',()=>{
-  loadState();
   const saved=localStorage.getItem('sm_token');
-  if(saved){TOKEN=saved; showApp();}
-
-  // Connect
+  if(saved){ TOKEN=saved; showApp(); }
   document.getElementById('btn-connect').addEventListener('click',connect);
   document.getElementById('input-token').addEventListener('keydown',e=>{if(e.key==='Enter')connect();});
-
-  // Tabs
   document.querySelectorAll('.tab').forEach(t=>t.addEventListener('click',()=>switchTab(t.dataset.tab)));
-  document.getElementById('settings-tab-btn').addEventListener('click',()=>{
-    const open=document.getElementById('settings-panel').style.display==='block';
-    switchTab(open?'shared':'settings');
-  });
-
-  // Refresh
   document.getElementById('btn-refresh').addEventListener('click',fetchAll);
-  document.getElementById('btn-refresh-indiv').addEventListener('click',fetchAll);
+  document.getElementById('btn-refresh-persons').addEventListener('click',fetchAll);
   document.getElementById('btn-notion').addEventListener('click',()=>window.open(NOTION_PAGE,'_blank'));
-  document.getElementById('btn-recalc-indiv').addEventListener('click',recalcIndivTotals);
-
-  // Qty per person
-  document.getElementById('qty-per-person').addEventListener('change',onQtyChange);
-  document.getElementById('qty-per-person').addEventListener('blur',onQtyChange);
-
-  // Add person (tab)
-  document.getElementById('btn-add-person-tab').addEventListener('click',()=>{
-    document.getElementById('modal-person-name').value='';
-    document.getElementById('modal-person').style.display='flex';
-    setTimeout(()=>document.getElementById('modal-person-name').focus(),100);
-  });
-  document.getElementById('modal-cancel').addEventListener('click',()=>{document.getElementById('modal-person').style.display='none';});
-  document.getElementById('modal-confirm').addEventListener('click',()=>{
-    const name=document.getElementById('modal-person-name').value.trim();
-    if(!name) return;
-    addPerson(name);
-    document.getElementById('modal-person').style.display='none';
-  });
-  document.getElementById('modal-person-name').addEventListener('keydown',e=>{if(e.key==='Enter')document.getElementById('modal-confirm').click();});
-
-  // Settings
-  document.getElementById('btn-add-shared').addEventListener('click',()=>addProduct('shared'));
-  document.getElementById('new-shared-name').addEventListener('keydown',e=>{if(e.key==='Enter')addProduct('shared');});
-  document.getElementById('btn-add-indiv').addEventListener('click',()=>addProduct('indiv'));
-  document.getElementById('new-indiv-name').addEventListener('keydown',e=>{if(e.key==='Enter')addProduct('indiv');});
-  document.getElementById('btn-add-person-set').addEventListener('click',()=>{
-    const name=document.getElementById('new-person-name').value.trim();
-    if(!name) return;
-    addPerson(name);
-    document.getElementById('new-person-name').value='';
-    renderSettingsLists();
-  });
-  document.getElementById('new-person-name').addEventListener('keydown',e=>{if(e.key==='Enter'){const n=document.getElementById('new-person-name').value.trim();if(!n)return;addPerson(n);document.getElementById('new-person-name').value='';renderSettingsLists();}});
-  document.getElementById('btn-reset-indiv-all').addEventListener('click',resetIndivAll);
-  document.getElementById('btn-logout').addEventListener('click',()=>{if(confirm('Se déconnecter ?')){localStorage.clear();location.reload();}});
-
-  // Person detail actions
-  document.getElementById('btn-reset-person').addEventListener('click',()=>{
-    if(currentPersonIdx<0) return;
-    const p=persons[currentPersonIdx];
-    if(!confirm(`Reset compteurs de ${p.name} ?`)) return;
-    indivProducts.forEach(prod=>{p.stocks[prod.id]=0;});
-    saveState();
-    renderPersonDetail();
-    renderPersonsGrid();
-    showToast('↺ Compteurs réinitialisés','success');
-  });
-  document.getElementById('btn-delete-person').addEventListener('click',()=>{
-    if(currentPersonIdx<0) return;
-    deletePerson(currentPersonIdx);
-  });
+  document.getElementById('btn-reset-person').addEventListener('click',resetPerson);
+  document.getElementById('settings-tab-btn').addEventListener('click',()=>window.open(NOTION_PAGE,'_blank'));
 });
 </script>
 </body>
