@@ -1,410 +1,183 @@
 <!DOCTYPE html>
 <html lang="fr">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0" />
-  <title>Stock Manager</title>
-  <link rel="preconnect" href="https://fonts.googleapis.com" />
-  <link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Syne:wght@700;800&display=swap" rel="stylesheet" />
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0"/>
+  <title>Bernanos — Stock</title>title>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Syne:wght@700;800&display=swap" rel="stylesheet"/>
   <style>
-    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+    :root{
+      --bg:#0f0f0f;--surface:#1a1a1a;--surface2:#242424;--border:#2e2e2e;
+      --text:#f0f0f0;--muted:#666;--ok:#2ecc71;--warn:#f39c12;--danger:#e74c3c;--accent:#4f8ef7;
+      --mono:'DM Mono',monospace;--display:'Syne',sans-serif;
+    }
+    body{background:var(--bg);color:var(--text);font-family:var(--mono);min-height:100vh}
 
-    :root {
-      --bg: #0f0f0f;
-      --surface: #1a1a1a;
-      --surface2: #242424;
-      --border: #2e2e2e;
-      --text: #f0f0f0;
-      --muted: #666;
-      --ok: #2ecc71;
-      --warn: #f39c12;
-      --danger: #e74c3c;
-      --accent: #4f8ef7;
-      --mono: 'DM Mono', monospace;
-      --display: 'Syne', sans-serif;
-    }
+    /* HEADER */
+    header{background:var(--surface);border-bottom:1px solid var(--border);padding:12px 16px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:100}
+    .header-left{display:flex;align-items:center;gap:10px}
+    .logo{width:36px;height:36px;border-radius:6px;object-fit:cover}
+    header h1{font-family:var(--display);font-size:1.1rem;font-weight:800;letter-spacing:-0.5px}
+    header h1 span{color:var(--accent)}
+    #sync-status{font-size:0.7rem;color:var(--muted);display:flex;align-items:center;gap:6px}
+    #sync-dot{width:7px;height:7px;border-radius:50%;background:var(--muted);transition:background 0.3s}
+    #sync-dot.ok{background:var(--ok)}
+    #sync-dot.loading{background:var(--warn);animation:pulse 1s infinite}
+    #sync-dot.error{background:var(--danger)}
+    @keyframes pulse{0%,100%{opacity:1}50%{opacity:0.3}}
 
-    body {
-      background: var(--bg);
-      color: var(--text);
-      font-family: var(--mono);
-      min-height: 100vh;
-      padding: 0;
-    }
+    /* SETUP */
+    #setup-screen{padding:40px 20px;max-width:480px;margin:0 auto}
+    #setup-screen h2{font-family:var(--display);font-size:1.5rem;margin-bottom:8px}
+    #setup-screen p{color:var(--muted);font-size:0.8rem;margin-bottom:28px;line-height:1.6}
+    .field{margin-bottom:18px}
+    .field label{display:block;font-size:0.72rem;color:var(--muted);margin-bottom:7px;text-transform:uppercase;letter-spacing:1px}
+    .field input{width:100%;background:var(--surface);border:1px solid var(--border);border-radius:8px;color:var(--text);font-family:var(--mono);font-size:0.82rem;padding:12px 14px;outline:none;transition:border-color 0.2s}
+    .field input:focus{border-color:var(--accent)}
+    .field input::placeholder{color:var(--muted)}
+    .btn-primary{width:100%;background:var(--accent);color:#fff;border:none;border-radius:8px;font-family:var(--display);font-size:0.95rem;font-weight:700;padding:14px;cursor:pointer;transition:opacity 0.2s,transform 0.1s}
+    .btn-primary:hover{opacity:0.9}
+    .btn-primary:active{transform:scale(0.98)}
+    .btn-primary:disabled{opacity:0.4;cursor:not-allowed}
+    .help-box{background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:14px 16px;margin-top:20px;font-size:0.75rem;color:var(--muted);line-height:1.7}
+    .help-box strong{color:var(--text)}
+    .help-box a{color:var(--accent);text-decoration:none}
+    #error-msg{color:var(--danger);font-size:0.78rem;margin-top:10px;display:none}
 
-    /* ─── HEADER ─── */
-    header {
-      background: var(--surface);
-      border-bottom: 1px solid var(--border);
-      padding: 18px 20px;
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      position: sticky;
-      top: 0;
-      z-index: 100;
-    }
-    header h1 {
-      font-family: var(--display);
-      font-size: 1.3rem;
-      font-weight: 800;
-      letter-spacing: -0.5px;
-    }
-    header h1 span { color: var(--accent); }
-    #sync-status {
-      font-size: 0.7rem;
-      color: var(--muted);
-      display: flex;
-      align-items: center;
-      gap: 6px;
-    }
-    #sync-dot {
-      width: 7px; height: 7px;
-      border-radius: 50%;
-      background: var(--muted);
-      transition: background 0.3s;
-    }
-    #sync-dot.ok { background: var(--ok); }
-    #sync-dot.loading { background: var(--warn); animation: pulse 1s infinite; }
-    #sync-dot.error { background: var(--danger); }
-    @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:0.3} }
+    /* APP */
+    #app-screen{display:none}
 
-    /* ─── SETUP ─── */
-    #setup-screen {
-      padding: 40px 20px;
-      max-width: 480px;
-      margin: 0 auto;
-    }
-    #setup-screen h2 {
-      font-family: var(--display);
-      font-size: 1.5rem;
-      margin-bottom: 8px;
-    }
-    #setup-screen p {
-      color: var(--muted);
-      font-size: 0.8rem;
-      margin-bottom: 28px;
-      line-height: 1.6;
-    }
-    .field { margin-bottom: 18px; }
-    .field label {
-      display: block;
-      font-size: 0.72rem;
-      color: var(--muted);
-      margin-bottom: 7px;
-      text-transform: uppercase;
-      letter-spacing: 1px;
-    }
-    .field input {
-      width: 100%;
-      background: var(--surface);
-      border: 1px solid var(--border);
-      border-radius: 8px;
-      color: var(--text);
-      font-family: var(--mono);
-      font-size: 0.82rem;
-      padding: 12px 14px;
-      outline: none;
-      transition: border-color 0.2s;
-    }
-    .field input:focus { border-color: var(--accent); }
-    .field input::placeholder { color: var(--muted); }
+    /* TABS */
+    .tabs-bar{background:var(--surface);border-bottom:1px solid var(--border);padding:0 16px;display:flex;align-items:center;gap:4px;overflow-x:auto;scrollbar-width:none}
+    .tabs-bar::-webkit-scrollbar{display:none}
+    .tab{flex-shrink:0;padding:12px 14px;font-family:var(--mono);font-size:0.8rem;color:var(--muted);border:none;background:none;cursor:pointer;border-bottom:2px solid transparent;transition:all 0.2s;white-space:nowrap}
+    .tab.active{color:var(--accent);border-bottom-color:var(--accent)}
+    .tab:hover:not(.active){color:var(--text)}
+    .tab-add{width:32px;height:32px;border-radius:50%;background:var(--surface2);border:1px solid var(--border);color:var(--muted);font-size:1.1rem;cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0;margin-left:4px;transition:all 0.2s}
+    .tab-add:hover{border-color:var(--accent);color:var(--accent)}
 
-    .btn-primary {
-      width: 100%;
-      background: var(--accent);
-      color: #fff;
-      border: none;
-      border-radius: 8px;
-      font-family: var(--display);
-      font-size: 0.95rem;
-      font-weight: 700;
-      padding: 14px;
-      cursor: pointer;
-      transition: opacity 0.2s, transform 0.1s;
-    }
-    .btn-primary:hover { opacity: 0.9; }
-    .btn-primary:active { transform: scale(0.98); }
-    .btn-primary:disabled { opacity: 0.4; cursor: not-allowed; }
+    /* CONTENT */
+    .tab-content{padding:16px;max-width:540px;margin:0 auto}
 
-    .help-box {
-      background: var(--surface);
-      border: 1px solid var(--border);
-      border-radius: 8px;
-      padding: 14px 16px;
-      margin-top: 20px;
-      font-size: 0.75rem;
-      color: var(--muted);
-      line-height: 1.7;
-    }
-    .help-box strong { color: var(--text); }
-    .help-box a { color: var(--accent); text-decoration: none; }
+    /* ALERT BANNER */
+    #alert-banner{display:none;background:#1a0a0a;border:1px solid var(--danger);border-radius:10px;padding:12px 16px;margin-bottom:16px;font-size:0.78rem;color:#ff8a80;line-height:1.6}
+    #alert-banner.show{display:block;animation:slideIn 0.3s ease}
+    #alert-banner .banner-title{font-family:var(--display);font-size:0.85rem;color:var(--danger);margin-bottom:6px}
+    @keyframes slideIn{from{opacity:0;transform:translateY(-8px)}to{opacity:1;transform:translateY(0)}}
 
-    /* ─── MAIN APP ─── */
-    #app-screen { display: none; padding: 16px; max-width: 540px; margin: 0 auto; }
+    .section-label{font-size:0.68rem;color:var(--muted);text-transform:uppercase;letter-spacing:1.5px;margin-bottom:10px;display:flex;align-items:center;justify-content:space-between}
 
-    /* Alert banner */
-    #alert-banner {
-      display: none;
-      background: #1a0a0a;
-      border: 1px solid var(--danger);
-      border-radius: 10px;
-      padding: 12px 16px;
-      margin-bottom: 16px;
-      font-size: 0.78rem;
-      color: #ff8a80;
-      line-height: 1.6;
-    }
-    #alert-banner.show { display: block; animation: slideIn 0.3s ease; }
-    #alert-banner .banner-title {
-      font-family: var(--display);
-      font-size: 0.85rem;
-      color: var(--danger);
-      margin-bottom: 6px;
-    }
+    /* PRODUCTS */
+    #products-list{display:flex;flex-direction:column;gap:10px}
+    .product-card{background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:14px 16px;display:grid;grid-template-columns:1fr auto;align-items:center;gap:10px;position:relative;overflow:hidden;transition:border-color 0.2s}
+    .product-card::before{content:'';position:absolute;left:0;top:0;bottom:0;width:3px;background:var(--ok);border-radius:3px 0 0 3px;transition:background 0.3s}
+    .product-card.warn::before{background:var(--warn)}
+    .product-card.danger::before{background:var(--danger)}
+    .product-card.warn{border-color:#3d2e0a}
+    .product-card.danger{border-color:#3d0a0a}
+    .product-name{font-family:var(--display);font-size:0.95rem;font-weight:700;margin-bottom:4px}
+    .product-meta{display:flex;align-items:center;gap:10px}
+    .product-qty{font-size:1.5rem;font-weight:500;line-height:1}
+    .product-qty.ok{color:var(--ok)}.product-qty.warn{color:var(--warn)}.product-qty.danger{color:var(--danger)}
+    .product-badge{font-size:0.68rem;padding:3px 8px;border-radius:4px;font-weight:500}
+    .badge-ok{background:#0d2e1a;color:var(--ok)}
+    .badge-warn{background:#2e1f00;color:var(--warn)}
+    .badge-danger{background:#2e0808;color:var(--danger)}
+    .product-last{font-size:0.68rem;color:var(--muted);margin-top:3px}
+    .product-controls{display:flex;flex-direction:column;align-items:center;gap:6px}
+    .ctrl-btn{width:38px;height:38px;border-radius:8px;border:1px solid var(--border);background:var(--surface2);color:var(--text);font-size:1.2rem;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all 0.15s;font-family:var(--mono)}
+    .ctrl-btn:hover{background:var(--border)}
+    .ctrl-btn:active{transform:scale(0.92)}
+    .ctrl-btn.minus{color:var(--danger);border-color:#3d0a0a}
+    .ctrl-btn.minus:hover{background:#2e0808}
+    .ctrl-btn.plus{color:var(--ok);border-color:#0d2e1a}
+    .ctrl-btn.plus:hover{background:#0d2e1a}
+    .ctrl-btn:disabled{opacity:0.3;cursor:not-allowed;transform:none}
+    .progress-bar{height:3px;background:var(--border);border-radius:2px;margin-top:8px;overflow:hidden}
+    .progress-fill{height:100%;border-radius:2px;transition:width 0.4s ease,background 0.3s}
+    .skeleton{background:var(--surface);border:1px solid var(--border);border-radius:12px;height:90px;animation:shimmer 1.4s infinite}
+    @keyframes shimmer{0%,100%{opacity:0.4}50%{opacity:0.8}}
 
-    @keyframes slideIn { from{opacity:0;transform:translateY(-8px)} to{opacity:1;transform:translateY(0)} }
+    /* BOTTOM */
+    .bottom-bar{margin-top:20px;display:flex;gap:10px}
+    .btn-secondary{flex:1;background:var(--surface);border:1px solid var(--border);border-radius:8px;color:var(--muted);font-family:var(--mono);font-size:0.78rem;padding:11px;cursor:pointer;transition:all 0.2s;text-align:center}
+    .btn-secondary:hover{border-color:var(--accent);color:var(--accent)}
+    .btn-danger-sm{background:none;border:1px solid #3d0a0a;border-radius:6px;color:var(--danger);font-family:var(--mono);font-size:0.72rem;padding:5px 10px;cursor:pointer;transition:all 0.2s}
+    .btn-danger-sm:hover{background:#2e0808}
 
-    /* Section title */
-    .section-label {
-      font-size: 0.68rem;
-      color: var(--muted);
-      text-transform: uppercase;
-      letter-spacing: 1.5px;
-      margin-bottom: 10px;
-    }
+    /* GEAR */
+    .gear-btn{background:none;border:1px solid var(--border);border-radius:6px;color:var(--muted);width:32px;height:32px;display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:0.9rem;transition:all 0.2s}
+    .gear-btn:hover{border-color:var(--accent);color:var(--accent)}
 
-    /* Products grid */
-    #products-list { display: flex; flex-direction: column; gap: 10px; }
+    /* MODAL */
+    .modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,0.7);z-index:200;display:flex;align-items:center;justify-content:center;padding:20px;animation:fadeIn 0.2s ease}
+    @keyframes fadeIn{from{opacity:0}to{opacity:1}}
+    .modal{background:var(--surface);border:1px solid var(--border);border-radius:14px;padding:24px;width:100%;max-width:400px;animation:slideUp 0.25s ease}
+    @keyframes slideUp{from{opacity:0;transform:translateY(20px)}to{opacity:1;transform:translateY(0)}}
+    .modal h3{font-family:var(--display);font-size:1.1rem;margin-bottom:16px}
+    .modal-actions{display:flex;gap:10px;margin-top:20px}
+    .btn-cancel{flex:1;background:var(--surface2);border:1px solid var(--border);border-radius:8px;color:var(--muted);font-family:var(--mono);font-size:0.85rem;padding:11px;cursor:pointer}
+    .btn-confirm{flex:1;background:var(--accent);border:none;border-radius:8px;color:#fff;font-family:var(--display);font-size:0.85rem;font-weight:700;padding:11px;cursor:pointer}
+    .btn-confirm:hover{opacity:0.9}
 
-    .product-card {
-      background: var(--surface);
-      border: 1px solid var(--border);
-      border-radius: 12px;
-      padding: 14px 16px;
-      display: grid;
-      grid-template-columns: 1fr auto;
-      align-items: center;
-      gap: 10px;
-      transition: border-color 0.2s, transform 0.15s;
-      position: relative;
-      overflow: hidden;
-    }
-    .product-card::before {
-      content: '';
-      position: absolute;
-      left: 0; top: 0; bottom: 0;
-      width: 3px;
-      background: var(--ok);
-      border-radius: 3px 0 0 3px;
-      transition: background 0.3s;
-    }
-    .product-card.warn::before { background: var(--warn); }
-    .product-card.danger::before { background: var(--danger); }
-    .product-card.warn { border-color: #3d2e0a; }
-    .product-card.danger { border-color: #3d0a0a; animation: shake 0.4s ease; }
+    /* SETTINGS PANEL */
+    #settings-panel{display:none;padding:16px;max-width:540px;margin:0 auto}
+    .settings-section{margin-bottom:24px}
+    .settings-section h3{font-family:var(--display);font-size:0.9rem;margin-bottom:12px;color:var(--muted);text-transform:uppercase;letter-spacing:1px}
+    .settings-row{background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:14px 16px;display:flex;align-items:center;justify-content:space-between;margin-bottom:8px}
+    .settings-row-label{font-size:0.85rem}
+    .settings-row-sub{font-size:0.72rem;color:var(--muted);margin-top:2px}
+    .add-product-row{display:flex;gap:8px;margin-top:10px}
+    .add-product-row input{flex:1;background:var(--surface);border:1px solid var(--border);border-radius:8px;color:var(--text);font-family:var(--mono);font-size:0.82rem;padding:10px 12px;outline:none;transition:border-color 0.2s}
+    .add-product-row input:focus{border-color:var(--accent)}
+    .add-product-row button{background:var(--accent);border:none;border-radius:8px;color:#fff;font-family:var(--display);font-weight:700;font-size:0.85rem;padding:10px 16px;cursor:pointer}
 
-    @keyframes shake {
-      0%,100%{transform:translateX(0)}
-      20%{transform:translateX(-4px)}
-      40%{transform:translateX(4px)}
-      60%{transform:translateX(-3px)}
-      80%{transform:translateX(3px)}
-    }
+    /* STATS */
+    .stats-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:16px}
+    .stat-card{background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:14px}
+    .stat-value{font-size:1.8rem;font-weight:500;font-family:var(--display);line-height:1}
+    .stat-label{font-size:0.68rem;color:var(--muted);margin-top:4px;text-transform:uppercase;letter-spacing:1px}
 
-    .product-name {
-      font-family: var(--display);
-      font-size: 0.95rem;
-      font-weight: 700;
-      margin-bottom: 4px;
-    }
-    .product-meta {
-      display: flex;
-      align-items: center;
-      gap: 10px;
-    }
-    .product-qty {
-      font-size: 1.5rem;
-      font-weight: 500;
-      line-height: 1;
-    }
-    .product-qty.ok { color: var(--ok); }
-    .product-qty.warn { color: var(--warn); }
-    .product-qty.danger { color: var(--danger); }
+    /* TOAST */
+    #toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%) translateY(80px);background:var(--surface2);border:1px solid var(--border);border-radius:10px;padding:12px 20px;font-size:0.8rem;color:var(--text);transition:transform 0.3s cubic-bezier(0.34,1.56,0.64,1);z-index:999;white-space:nowrap;max-width:90vw;text-align:center}
+    #toast.show{transform:translateX(-50%) translateY(0)}
+    #toast.success{border-color:var(--ok);color:var(--ok)}
+    #toast.error{border-color:var(--danger);color:var(--danger)}
+    #toast.warning{border-color:var(--warn);color:var(--warn)}
 
-    .product-badge {
-      font-size: 0.68rem;
-      padding: 3px 8px;
-      border-radius: 4px;
-      font-weight: 500;
-    }
-    .badge-ok { background: #0d2e1a; color: var(--ok); }
-    .badge-warn { background: #2e1f00; color: var(--warn); }
-    .badge-danger { background: #2e0808; color: var(--danger); }
-
-    .product-last {
-      font-size: 0.68rem;
-      color: var(--muted);
-      margin-top: 3px;
-    }
-
-    /* Controls */
-    .product-controls {
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      gap: 6px;
-    }
-    .ctrl-btn {
-      width: 38px; height: 38px;
-      border-radius: 8px;
-      border: 1px solid var(--border);
-      background: var(--surface2);
-      color: var(--text);
-      font-size: 1.1rem;
-      cursor: pointer;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      transition: all 0.15s;
-      line-height: 1;
-    }
-    .ctrl-btn:hover { background: var(--border); }
-    .ctrl-btn:active { transform: scale(0.92); }
-    .ctrl-btn.minus { color: var(--danger); border-color: #3d0a0a; }
-    .ctrl-btn.minus:hover { background: #2e0808; }
-    .ctrl-btn.plus { color: var(--ok); border-color: #0d2e1a; }
-    .ctrl-btn.plus:hover { background: #0d2e1a; }
-    .ctrl-btn:disabled { opacity: 0.3; cursor: not-allowed; }
-
-    /* Progress bar */
-    .progress-bar {
-      height: 3px;
-      background: var(--border);
-      border-radius: 2px;
-      margin-top: 8px;
-      overflow: hidden;
-    }
-    .progress-fill {
-      height: 100%;
-      border-radius: 2px;
-      transition: width 0.4s ease, background 0.3s;
-    }
-
-    /* Loading skeleton */
-    .skeleton {
-      background: var(--surface);
-      border: 1px solid var(--border);
-      border-radius: 12px;
-      padding: 14px 16px;
-      height: 90px;
-      animation: shimmer 1.4s infinite;
-    }
-    @keyframes shimmer {
-      0%,100%{opacity:0.4} 50%{opacity:0.8}
-    }
-
-    /* Bottom action */
-    .bottom-bar {
-      margin-top: 20px;
-      display: flex;
-      gap: 10px;
-    }
-    .btn-secondary {
-      flex: 1;
-      background: var(--surface);
-      border: 1px solid var(--border);
-      border-radius: 8px;
-      color: var(--muted);
-      font-family: var(--mono);
-      font-size: 0.78rem;
-      padding: 11px;
-      cursor: pointer;
-      transition: all 0.2s;
-      text-align: center;
-    }
-    .btn-secondary:hover { border-color: var(--accent); color: var(--accent); }
-
-    /* Toast */
-    #toast {
-      position: fixed;
-      bottom: 24px;
-      left: 50%;
-      transform: translateX(-50%) translateY(80px);
-      background: var(--surface2);
-      border: 1px solid var(--border);
-      border-radius: 10px;
-      padding: 12px 20px;
-      font-size: 0.8rem;
-      color: var(--text);
-      transition: transform 0.3s cubic-bezier(0.34,1.56,0.64,1);
-      z-index: 999;
-      white-space: nowrap;
-      max-width: 90vw;
-      text-align: center;
-    }
-    #toast.show { transform: translateX(-50%) translateY(0); }
-    #toast.success { border-color: var(--ok); color: var(--ok); }
-    #toast.error { border-color: var(--danger); color: var(--danger); }
-    #toast.warning { border-color: var(--warn); color: var(--warn); }
-
-    /* Overlay error */
-    #error-msg {
-      color: var(--danger);
-      font-size: 0.78rem;
-      margin-top: 10px;
-      display: none;
-    }
-
-    /* Settings gear */
-    .gear-btn {
-      background: none;
-      border: 1px solid var(--border);
-      border-radius: 6px;
-      color: var(--muted);
-      width: 32px; height: 32px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      cursor: pointer;
-      font-size: 0.9rem;
-      transition: all 0.2s;
-    }
-    .gear-btn:hover { border-color: var(--accent); color: var(--accent); }
-
-    /* Responsive */
-    @media(min-width:540px) {
-      header { padding: 18px 32px; }
-      #app-screen, #setup-screen { padding: 24px 32px; }
+    @media(min-width:540px){
+      header{padding:14px 24px}
+      .tab-content,#settings-panel{padding:24px}
     }
   </style>
 </head>
 <body>
 
 <header>
-  <h1>Stock<span>.</span></h1>
-  <div style="display:flex;align-items:center;gap:10px">
+  <div class="header-left">
+    <img class="logo" src="data:image/jpeg;base64,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" alt="Bernanos"/>
+    <h1>Bernanos<span>.</span></h1>
+  </div>
+  <div style="display:flex;align-items:center;gap:8px">
     <div id="sync-status">
       <div id="sync-dot"></div>
       <span id="sync-label">—</span>
     </div>
-    <button class="gear-btn" id="settings-btn" title="Paramètres" style="display:none">⚙</button>
+    <button class="gear-btn" id="settings-tab-btn" title="Paramètres" style="display:none">⚙</button>
   </div>
 </header>
 
 <!-- SETUP -->
 <div id="setup-screen">
   <h2>Configuration</h2>
-  <p>Entre ton token Notion et l'ID de ta base de données pour commencer.</p>
-
+  <p>Entre ton token Notion pour connecter l'app à ta base de données.</p>
   <div class="field">
     <label>Token d'intégration Notion</label>
-    <input type="password" id="input-token" placeholder="ntn_xxxxxxxxxxxx" autocomplete="off" />
+    <input type="password" id="input-token" placeholder="ntn_xxxxxxxxxxxx" autocomplete="off"/>
   </div>
-
   <button class="btn-primary" id="btn-connect">Connecter →</button>
   <div id="error-msg">❌ Impossible de se connecter. Vérifie ton token.</div>
-
   <div class="help-box">
     <strong>Où trouver le token ?</strong><br><br>
     1. Va sur <a href="https://www.notion.so/my-integrations" target="_blank">notion.so/my-integrations</a><br>
@@ -415,247 +188,507 @@
 
 <!-- APP -->
 <div id="app-screen">
-  <div id="alert-banner">
-    <div class="banner-title">⚠️ Produits à commander</div>
-    <div id="alert-list"></div>
+  <!-- TABS -->
+  <div class="tabs-bar" id="tabs-bar">
+    <button class="tab active" data-tab="shared" id="tab-shared">📦 Stock partagé</button>
+    <!-- onglets personnes générés dynamiquement -->
+    <button class="tab-add" id="btn-add-person" title="Ajouter une personne">+</button>
   </div>
 
-  <div class="section-label">Stock partagé</div>
-  <div id="products-list">
-    <div class="skeleton"></div>
-    <div class="skeleton"></div>
-    <div class="skeleton"></div>
-    <div class="skeleton"></div>
-    <div class="skeleton"></div>
+  <!-- CONTENU ONGLET STOCK PARTAGÉ -->
+  <div id="view-shared" class="tab-content">
+    <div id="alert-banner">
+      <div class="banner-title">⚠️ Produits à commander</div>
+      <div id="alert-list"></div>
+    </div>
+    <div class="stats-grid" id="stats-grid" style="display:none">
+      <div class="stat-card">
+        <div class="stat-value" id="stat-total">—</div>
+        <div class="stat-label">Produits distribués</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-value" id="stat-critical" style="color:var(--danger)">—</div>
+        <div class="stat-label">En alerte critique</div>
+      </div>
+    </div>
+    <div class="section-label">
+      <span>Stock partagé</span>
+    </div>
+    <div id="products-list">
+      <div class="skeleton"></div><div class="skeleton"></div>
+      <div class="skeleton"></div><div class="skeleton"></div><div class="skeleton"></div>
+    </div>
+    <div class="bottom-bar">
+      <button class="btn-secondary" id="btn-refresh">↻ Actualiser</button>
+      <button class="btn-secondary" id="btn-notion">Notion ↗</button>
+    </div>
   </div>
 
-  <div class="bottom-bar">
-    <button class="btn-secondary" id="btn-refresh">↻ Actualiser</button>
-    <button class="btn-secondary" id="btn-notion">Ouvrir Notion ↗</button>
+  <!-- CONTENU ONGLETS PERSONNES (généré dynamiquement) -->
+  <div id="views-persons"></div>
+
+  <!-- PARAMÈTRES -->
+  <div id="settings-panel">
+    <div class="settings-section">
+      <h3>Produits</h3>
+      <div id="settings-products-list"></div>
+      <div class="add-product-row">
+        <input type="text" id="new-product-name" placeholder="Nom du nouveau produit..."/>
+        <button id="btn-add-product">+ Ajouter</button>
+      </div>
+    </div>
+    <div class="settings-section">
+      <h3>Données</h3>
+      <div class="settings-row">
+        <div>
+          <div class="settings-row-label">Réinitialiser tous les stocks</div>
+          <div class="settings-row-sub">Remet toutes les quantités à 10</div>
+        </div>
+        <button class="btn-danger-sm" id="btn-reset-all">Reset</button>
+      </div>
+      <div class="settings-row">
+        <div>
+          <div class="settings-row-label">Se déconnecter</div>
+          <div class="settings-row-sub">Efface le token sauvegardé</div>
+        </div>
+        <button class="btn-danger-sm" id="btn-logout">Logout</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL AJOUT PERSONNE -->
+<div id="modal-person" class="modal-overlay" style="display:none">
+  <div class="modal">
+    <h3>👤 Nouvelle personne</h3>
+    <div class="field">
+      <label>Prénom</label>
+      <input type="text" id="modal-person-name" placeholder="Ex: Marie"/>
+    </div>
+    <div class="modal-actions">
+      <button class="btn-cancel" id="modal-cancel">Annuler</button>
+      <button class="btn-confirm" id="modal-confirm">Créer</button>
+    </div>
   </div>
 </div>
 
 <div id="toast"></div>
 
 <script>
-  // ─── CONFIG ───
-  const DB_ID = '5fa77d9813c08353941c01d42d74d891';
-  const NOTION_PAGE = 'https://app.notion.com/p/b4177d9813c083f5afe5813b3e54ecda';
+const DB_ID = '5fa77d9813c08353941c01d42d74d891';
+const NOTION_PAGE = 'https://app.notion.com/p/b4177d9813c083f5afe5813b3e54ecda';
+const DEFAULT_QTY = 10;
 
-  let TOKEN = '';
-  let products = [];
+let TOKEN = '';
+let products = [];
+let persons = JSON.parse(localStorage.getItem('sm_persons') || '[]');
+// persons: [{name, stocks: {productId: qty}}]
 
-  // ─── NOTION API via proxy /api/notion (pas de CORS) ───
-  async function notionRequest(endpoint, method = 'GET', body = null) {
-    const url = `/api/notion?endpoint=${encodeURIComponent(endpoint)}`;
-    const opts = {
-      method,
-      headers: {
-        'Authorization': `Bearer ${TOKEN}`,
-        'Notion-Version': '2022-06-28',
-        'Content-Type': 'application/json'
-      }
-    };
-    if (body) opts.body = JSON.stringify(body);
-    const res = await fetch(url, opts);
-    const data = await res.json();
-    if (!res.ok) throw new Error(data.message || 'Erreur API');
-    return data;
+// ─── API ───
+async function notionReq(endpoint, method='GET', body=null){
+  const url=`/api/notion?endpoint=${encodeURIComponent(endpoint)}`;
+  const opts={method,headers:{'Authorization':`Bearer ${TOKEN}`,'Notion-Version':'2022-06-28','Content-Type':'application/json'}};
+  if(body) opts.body=JSON.stringify(body);
+  const res=await fetch(url,opts);
+  const data=await res.json();
+  if(!res.ok) throw new Error(data.message||'Erreur API');
+  return data;
+}
+
+// ─── FETCH ───
+async function fetchProducts(){
+  setSyncStatus('loading','Chargement...');
+  try{
+    const data=await notionReq(`databases/${DB_ID}/query`,'POST',{sorts:[{property:'Quantité dispo',direction:'ascending'}]});
+    products=data.results.map(p=>({
+      id:p.id,
+      name:p.properties['Nom']?.title?.[0]?.plain_text||'?',
+      dispo:p.properties['Quantité dispo']?.number??0,
+      total:p.properties['Quantité']?.number??DEFAULT_QTY,
+      lastEdit:p.properties['Dernière utilisation']?.date?.start||null
+    }));
+    renderShared();
+    renderAllPersonViews();
+    renderSettingsProducts();
+    updateStats();
+    checkAlerts();
+    setSyncStatus('ok','Synchronisé');
+  }catch(e){
+    setSyncStatus('error','Erreur');
+    showToast('❌ '+e.message,'error');
   }
+}
 
-  // ─── FETCH PRODUCTS ───
-  async function fetchProducts() {
-    setSyncStatus('loading', 'Chargement...');
-    try {
-      const data = await notionRequest(`databases/${DB_ID}/query`, 'POST', {
-        sorts: [{ property: 'Quantité dispo', direction: 'ascending' }]
-      });
+// ─── RENDER SHARED ───
+function getLevel(dispo){return dispo<=1?'danger':dispo<=3?'warn':'ok'}
+function renderShared(){
+  const list=document.getElementById('products-list');
+  if(!products.length){list.innerHTML='<p style="color:var(--muted);font-size:0.8rem;text-align:center;padding:20px">Aucun produit.</p>';return;}
+  list.innerHTML=products.map(p=>productCard(p,(delta)=>updateSharedStock(p.id,delta))).join('');
+}
+function productCard(p,onDelta){
+  const level=getLevel(p.dispo);
+  const pct=Math.max(0,Math.min(100,(p.dispo/p.total)*100));
+  const fillColor=level==='ok'?'var(--ok)':level==='warn'?'var(--warn)':'var(--danger)';
+  const badge=level==='ok'?'<span class="product-badge badge-ok">✅ OK</span>':level==='warn'?'<span class="product-badge badge-warn">🟠 Stock bas</span>':'<span class="product-badge badge-danger">🔴 URGENT</span>';
+  const lastStr=p.lastEdit?`Utilisé le ${new Date(p.lastEdit).toLocaleDateString('fr-FR')}`:'Jamais utilisé';
+  const cbId=`ctrl_${p.id}_${Math.random().toString(36).slice(2)}`;
+  return `<div class="product-card ${level}">
+    <div>
+      <div class="product-name">${p.name}</div>
+      <div class="product-meta">
+        <div class="product-qty ${level}">${p.dispo}</div>
+        <div>${badge}<div class="product-last">${lastStr}</div></div>
+      </div>
+      <div class="progress-bar"><div class="progress-fill" style="width:${pct}%;background:${fillColor}"></div></div>
+    </div>
+    <div class="product-controls">
+      <button class="ctrl-btn plus" onclick="(${onDelta.toString()})(1)">+</button>
+      <button class="ctrl-btn minus" onclick="(${onDelta.toString()})(-1)" ${p.dispo<=0?'disabled':''}>−</button>
+    </div>
+  </div>`;
+}
 
-      products = data.results.map(p => {
-        const props = p.properties;
-        return {
-          id: p.id,
-          name: props['Nom']?.title?.[0]?.plain_text || '?',
-          dispo: props['Quantité dispo']?.number ?? 0,
-          total: props['Quantité']?.number ?? 10,
-          lastEdit: props['Dernière utilisation']?.date?.start || null
-        };
-      });
-
-      renderProducts();
-      checkAlerts();
-      setSyncStatus('ok', 'Synchronisé');
-    } catch(e) {
-      setSyncStatus('error', 'Erreur');
-      showToast('❌ ' + e.message, 'error');
-    }
+// ─── UPDATE SHARED STOCK ───
+async function updateSharedStock(pageId, delta){
+  const p=products.find(x=>x.id===pageId);
+  if(!p) return;
+  const newQty=Math.max(0,p.dispo+delta);
+  p.dispo=newQty;
+  renderShared();
+  renderAllPersonViews();
+  updateStats();
+  setSyncStatus('loading','Mise à jour...');
+  try{
+    await notionReq(`pages/${pageId}`,'PATCH',{properties:{
+      'Quantité dispo':{number:newQty},
+      'Dernière utilisation':{date:{start:new Date().toISOString().split('T')[0]}}
+    }});
+    setSyncStatus('ok','Synchronisé');
+    checkAlerts();
+    if(newQty<=1) showToast(`🔴 ${p.name} — Commander maintenant !`,'error');
+    else if(newQty<=3) showToast(`🟠 ${p.name} — Stock bas (${newQty})`,'warning');
+    else showToast(`${delta>0?'📦 +1':'✓ −1'} ${p.name}`,'success');
+  }catch(e){
+    p.dispo-=delta;
+    renderShared();
+    setSyncStatus('error','Erreur');
+    showToast('❌ '+e.message,'error');
   }
+}
 
-  // ─── RENDER ───
-  function renderProducts() {
-    const list = document.getElementById('products-list');
-    if (!products.length) {
-      list.innerHTML = '<p style="color:var(--muted);font-size:0.8rem;text-align:center;padding:20px">Aucun produit trouvé.</p>';
-      return;
-    }
+// ─── PERSONS ───
+function savePeopleSt(){localStorage.setItem('sm_persons',JSON.stringify(persons));}
 
-    list.innerHTML = products.map(p => {
-      const pct = Math.max(0, Math.min(100, (p.dispo / p.total) * 100));
-      const level = p.dispo <= 1 ? 'danger' : p.dispo <= 3 ? 'warn' : 'ok';
-      const badge = level === 'ok'
-        ? '<span class="product-badge badge-ok">✅ OK</span>'
-        : level === 'warn'
-        ? '<span class="product-badge badge-warn">🟠 Stock bas</span>'
-        : '<span class="product-badge badge-danger">🔴 URGENT</span>';
-      const fillColor = level === 'ok' ? 'var(--ok)' : level === 'warn' ? 'var(--warn)' : 'var(--danger)';
-      const lastStr = p.lastEdit
-        ? `Utilisé le ${new Date(p.lastEdit).toLocaleDateString('fr-FR')}`
-        : 'Jamais utilisé';
+function addPerson(name){
+  if(!name.trim()) return;
+  const stocks={};
+  products.forEach(p=>{stocks[p.id]=0;});
+  persons.push({name:name.trim(),stocks});
+  savePeopleSt();
+  renderTabs();
+  renderAllPersonViews();
+}
 
-      return `
-        <div class="product-card ${level}" data-id="${p.id}">
+function renderTabs(){
+  const bar=document.getElementById('tabs-bar');
+  // Supprimer anciens onglets personnes
+  bar.querySelectorAll('.tab[data-tab^="person-"]').forEach(t=>t.remove());
+  // Insérer avant le bouton +
+  const addBtn=document.getElementById('btn-add-person');
+  persons.forEach((person,idx)=>{
+    const t=document.createElement('button');
+    t.className='tab';
+    t.dataset.tab=`person-${idx}`;
+    t.textContent=`👤 ${person.name}`;
+    t.onclick=()=>switchTab(`person-${idx}`);
+    bar.insertBefore(t,addBtn);
+  });
+}
+
+function renderAllPersonViews(){
+  const container=document.getElementById('views-persons');
+  container.innerHTML='';
+  persons.forEach((person,idx)=>{
+    const div=document.createElement('div');
+    div.id=`view-person-${idx}`;
+    div.className='tab-content';
+    div.style.display='none';
+    div.innerHTML=personView(person,idx);
+    container.appendChild(div);
+  });
+}
+
+function personView(person,idx){
+  if(!products.length) return '<p style="color:var(--muted);font-size:0.8rem;padding:20px">Chargement...</p>';
+  // Stats perso
+  const totalUsed=Object.values(person.stocks||{}).reduce((a,b)=>a+(b||0),0);
+  const html=`
+    <div class="stats-grid">
+      <div class="stat-card">
+        <div class="stat-value" style="color:var(--accent)">${totalUsed}</div>
+        <div class="stat-label">Total distribué</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-value" style="color:var(--warn)">${products.length}</div>
+        <div class="stat-label">Produits suivis</div>
+      </div>
+    </div>
+    <div class="section-label">
+      <span>Stock de ${person.name}</span>
+      <button class="btn-danger-sm" onclick="resetPersonStats(${idx})">Reset compteur</button>
+    </div>
+    <div id="person-products-${idx}" style="display:flex;flex-direction:column;gap:10px">
+      ${products.map(p=>{
+        const personQty=person.stocks?.[p.id]||0;
+        const sharedDispo=p.dispo;
+        const level=getLevel(sharedDispo);
+        const badge=level==='ok'?'<span class="product-badge badge-ok">✅ OK</span>':level==='warn'?'<span class="product-badge badge-warn">🟠 Stock bas</span>':'<span class="product-badge badge-danger">🔴 URGENT</span>';
+        return `<div class="product-card ${level}">
           <div>
             <div class="product-name">${p.name}</div>
             <div class="product-meta">
-              <div class="product-qty ${level}">${p.dispo}</div>
-              <div>
-                ${badge}
-                <div class="product-last">${lastStr}</div>
-              </div>
+              <div class="product-qty ${level}">${sharedDispo}</div>
+              <div>${badge}<div class="product-last">Pris par ${person.name}: <strong>${personQty}</strong></div></div>
             </div>
-            <div class="progress-bar">
-              <div class="progress-fill" style="width:${pct}%;background:${fillColor}"></div>
-            </div>
+            <div class="progress-bar"><div class="progress-fill" style="width:${Math.max(0,Math.min(100,(sharedDispo/p.total)*100))}%;background:${level==='ok'?'var(--ok)':level==='warn'?'var(--warn)':'var(--danger)'}"></div></div>
           </div>
           <div class="product-controls">
-            <button class="ctrl-btn plus" onclick="updateStock('${p.id}', 1)" title="+1">+</button>
-            <button class="ctrl-btn minus" onclick="updateStock('${p.id}', -1)" ${p.dispo <= 0 ? 'disabled' : ''} title="-1">−</button>
+            <button class="ctrl-btn plus" onclick="personTakeProduct(${idx},'${p.id}',1)" ${sharedDispo<=0?'disabled':''}>+</button>
+            <button class="ctrl-btn minus" onclick="personTakeProduct(${idx},'${p.id}',-1)" ${personQty<=0?'disabled':''}>−</button>
           </div>
         </div>`;
-    }).join('');
+      }).join('')}
+    </div>
+    <div class="bottom-bar">
+      <button class="btn-secondary" onclick="fetchProducts()">↻ Actualiser</button>
+      <button class="btn-danger-sm" style="flex:1" onclick="confirmDeletePerson(${idx})">🗑 Supprimer ${person.name}</button>
+    </div>`;
+  return html;
+}
+
+async function personTakeProduct(personIdx, productId, delta){
+  const person=persons[personIdx];
+  const p=products.find(x=>x.id===productId);
+  if(!person||!p) return;
+
+  // Vérif
+  if(delta>0 && p.dispo<=0){showToast('🔴 Plus de stock disponible','error');return;}
+  if(delta<0 && (person.stocks[productId]||0)<=0){return;}
+
+  // Mise à jour locale
+  person.stocks[productId]=(person.stocks[productId]||0)+delta;
+  p.dispo=Math.max(0,p.dispo+delta);
+  savePeopleSt();
+  renderAllPersonViews();
+  renderShared();
+  updateStats();
+
+  // Sync Notion
+  setSyncStatus('loading','Mise à jour...');
+  try{
+    await notionReq(`pages/${productId}`,'PATCH',{properties:{
+      'Quantité dispo':{number:p.dispo},
+      'Dernière utilisation':{date:{start:new Date().toISOString().split('T')[0]}}
+    }});
+    setSyncStatus('ok','Synchronisé');
+    checkAlerts();
+    if(delta>0) showToast(`📦 ${person.name} a pris 1 ${p.name}`,'success');
+    else showToast(`↩ ${person.name} a rendu 1 ${p.name}`,'success');
+  }catch(e){
+    person.stocks[productId]-=delta;
+    p.dispo-=delta;
+    savePeopleSt();
+    renderAllPersonViews();
+    renderShared();
+    setSyncStatus('error','Erreur');
+    showToast('❌ '+e.message,'error');
   }
+}
 
-  // ─── UPDATE STOCK ───
-  async function updateStock(pageId, delta) {
-    const product = products.find(p => p.id === pageId);
-    if (!product) return;
+function resetPersonStats(idx){
+  if(!confirm(`Réinitialiser les compteurs de ${persons[idx].name} ?`)) return;
+  persons[idx].stocks={};
+  products.forEach(p=>{persons[idx].stocks[p.id]=0;});
+  savePeopleSt();
+  renderAllPersonViews();
+  showToast(`↺ Compteurs de ${persons[idx].name} réinitialisés`,'success');
+}
 
-    const newQty = Math.max(0, product.dispo + delta);
-    const today = new Date().toISOString().split('T')[0];
+function confirmDeletePerson(idx){
+  if(!confirm(`Supprimer ${persons[idx].name} ?`)) return;
+  persons.splice(idx,1);
+  savePeopleSt();
+  renderTabs();
+  renderAllPersonViews();
+  switchTab('shared');
+}
 
-    // Optimistic update
-    product.dispo = newQty;
-    renderProducts();
+// ─── STATS ───
+function updateStats(){
+  const total=persons.reduce((sum,p)=>sum+Object.values(p.stocks||{}).reduce((a,b)=>a+(b||0),0),0);
+  const critical=products.filter(p=>p.dispo<=1).length;
+  document.getElementById('stat-total').textContent=total;
+  document.getElementById('stat-critical').textContent=critical;
+  document.getElementById('stats-grid').style.display=persons.length?'grid':'none';
+}
 
-    setSyncStatus('loading', 'Mise à jour...');
-    try {
-      await notionRequest(`pages/${pageId}`, 'PATCH', {
-        properties: {
-          'Quantité dispo': { number: newQty },
-          'Dernière utilisation': { date: { start: today } }
-        }
-      });
+// ─── SETTINGS PRODUCTS ───
+function renderSettingsProducts(){
+  const list=document.getElementById('settings-products-list');
+  if(!products.length){list.innerHTML='<p style="color:var(--muted);font-size:0.8rem">Aucun produit.</p>';return;}
+  list.innerHTML=products.map(p=>`
+    <div class="settings-row">
+      <div>
+        <div class="settings-row-label">${p.name}</div>
+        <div class="settings-row-sub">Dispo: ${p.dispo} / ${p.total}</div>
+      </div>
+      <div style="display:flex;align-items:center;gap:8px">
+        <button class="ctrl-btn plus" style="width:30px;height:30px" onclick="updateSharedStock('${p.id}',1)">+</button>
+        <button class="ctrl-btn minus" style="width:30px;height:30px" onclick="updateSharedStock('${p.id}',-1)" ${p.dispo<=0?'disabled':''}>−</button>
+      </div>
+    </div>`).join('');
+}
 
-      setSyncStatus('ok', 'Synchronisé');
-      checkAlerts();
+async function addNewProduct(){
+  const input=document.getElementById('new-product-name');
+  const name=input.value.trim();
+  if(!name) return;
+  setSyncStatus('loading','Création...');
+  try{
+    await notionReq(`pages`,'POST',{parent:{database_id:DB_ID},properties:{
+      'Nom':{title:[{text:{content:name}}]},
+      'Quantité':{number:DEFAULT_QTY},
+      'Quantité dispo':{number:DEFAULT_QTY},
+      "Seuil d'alerte":{number:2},
+      'Type':{select:{name:'Produit'}}
+    }});
+    input.value='';
+    showToast(`✅ ${name} ajouté`,'success');
+    await fetchProducts();
+  }catch(e){
+    setSyncStatus('error','Erreur');
+    showToast('❌ '+e.message,'error');
+  }
+}
 
-      if (newQty <= 1) {
-        showToast(`🔴 ${product.name} — Commander maintenant !`, 'error');
-      } else if (newQty <= 3) {
-        showToast(`🟠 ${product.name} — Stock bas (${newQty} restants)`, 'warning');
-      } else {
-        showToast(`${delta > 0 ? '📦 +1' : '✓ -1'} ${product.name}`, 'success');
-      }
-    } catch(e) {
-      // Rollback
-      product.dispo -= delta;
-      renderProducts();
-      setSyncStatus('error', 'Erreur');
-      showToast('❌ Erreur : ' + e.message, 'error');
+async function resetAllStocks(){
+  if(!confirm('Remettre tous les stocks à 10 ?')) return;
+  setSyncStatus('loading','Reset...');
+  try{
+    for(const p of products){
+      await notionReq(`pages/${p.id}`,'PATCH',{properties:{'Quantité dispo':{number:DEFAULT_QTY}}});
+      p.dispo=DEFAULT_QTY;
     }
+    renderShared();
+    renderAllPersonViews();
+    updateStats();
+    setSyncStatus('ok','Synchronisé');
+    showToast('↺ Stocks réinitialisés à 10','success');
+  }catch(e){
+    setSyncStatus('error','Erreur');
+    showToast('❌ '+e.message,'error');
   }
+}
 
-  // ─── ALERTS ───
-  function checkAlerts() {
-    const critical = products.filter(p => p.dispo <= 3);
-    const banner = document.getElementById('alert-banner');
-    const list = document.getElementById('alert-list');
-
-    if (critical.length) {
-      list.innerHTML = critical.map(p => {
-        const icon = p.dispo <= 1 ? '🔴' : '🟠';
-        return `${icon} <strong>${p.name}</strong> — ${p.dispo} restant${p.dispo > 1 ? 's' : ''}`;
-      }).join('<br>');
-      banner.classList.add('show');
-    } else {
-      banner.classList.remove('show');
-    }
-  }
-
-  // ─── SYNC STATUS ───
-  function setSyncStatus(state, label) {
-    const dot = document.getElementById('sync-dot');
-    const lbl = document.getElementById('sync-label');
-    dot.className = state;
-    lbl.textContent = label;
-  }
-
-  // ─── TOAST ───
-  let toastTimer;
-  function showToast(msg, type = '') {
-    const t = document.getElementById('toast');
-    t.textContent = msg;
-    t.className = `show ${type}`;
-    clearTimeout(toastTimer);
-    toastTimer = setTimeout(() => { t.className = ''; }, 3200);
-  }
-
-  // ─── CONNECT ───
-  async function connect() {
-    const token = document.getElementById('input-token').value.trim();
-    if (!token) { return; }
-
-    TOKEN = token;
-    document.getElementById('btn-connect').disabled = true;
-    document.getElementById('btn-connect').textContent = 'Connexion...';
-    document.getElementById('error-msg').style.display = 'none';
-
-    try {
-      await notionRequest(`databases/${DB_ID}/query`, 'POST', { page_size: 1 });
-      localStorage.setItem('sm_token', token);
-      showApp();
-    } catch(e) {
-      TOKEN = '';
-      document.getElementById('btn-connect').disabled = false;
-      document.getElementById('btn-connect').textContent = 'Connecter →';
-      document.getElementById('error-msg').style.display = 'block';
-    }
-  }
-
-  function showApp() {
-    document.getElementById('setup-screen').style.display = 'none';
-    document.getElementById('app-screen').style.display = 'block';
-    document.getElementById('settings-btn').style.display = 'flex';
-    fetchProducts();
-  }
-
-  // ─── INIT ───
-  window.addEventListener('DOMContentLoaded', () => {
-    const saved = localStorage.getItem('sm_token');
-    if (saved) { TOKEN = saved; showApp(); }
-
-    document.getElementById('btn-connect').addEventListener('click', connect);
-    document.getElementById('input-token').addEventListener('keydown', e => { if(e.key==='Enter') connect(); });
-    document.getElementById('btn-refresh').addEventListener('click', fetchProducts);
-    document.getElementById('btn-notion').addEventListener('click', () => window.open(NOTION_PAGE, '_blank'));
-    document.getElementById('settings-btn').addEventListener('click', () => {
-      if(confirm('Se déconnecter et reconfigurer ?')) {
-        localStorage.clear();
-        TOKEN = '';
-        location.reload();
-      }
-    });
+// ─── TABS ───
+function switchTab(tabId){
+  document.querySelectorAll('.tab').forEach(t=>t.classList.toggle('active',t.dataset.tab===tabId));
+  document.getElementById('view-shared').style.display=tabId==='shared'?'block':'none';
+  document.getElementById('settings-panel').style.display=tabId==='settings'?'block':'none';
+  document.querySelectorAll('[id^="view-person-"]').forEach(v=>{
+    const idx=v.id.replace('view-person-','');
+    v.style.display=tabId===`person-${idx}`?'block':'none';
   });
+}
+
+// ─── ALERTS ───
+function checkAlerts(){
+  const critical=products.filter(p=>p.dispo<=3);
+  const banner=document.getElementById('alert-banner');
+  if(critical.length){
+    document.getElementById('alert-list').innerHTML=critical.map(p=>`${p.dispo<=1?'🔴':'🟠'} <strong>${p.name}</strong> — ${p.dispo} restant${p.dispo>1?'s':''}`).join('<br>');
+    banner.classList.add('show');
+  }else{banner.classList.remove('show');}
+}
+
+// ─── UTILS ───
+function setSyncStatus(state,label){
+  document.getElementById('sync-dot').className=state;
+  document.getElementById('sync-label').textContent=label;
+}
+let toastTimer;
+function showToast(msg,type=''){
+  const t=document.getElementById('toast');
+  t.textContent=msg;t.className=`show ${type}`;
+  clearTimeout(toastTimer);
+  toastTimer=setTimeout(()=>{t.className='';},3200);
+}
+async function connect(){
+  const token=document.getElementById('input-token').value.trim();
+  if(!token) return;
+  TOKEN=token;
+  const btn=document.getElementById('btn-connect');
+  btn.disabled=true;btn.textContent='Connexion...';
+  document.getElementById('error-msg').style.display='none';
+  try{
+    await notionReq(`databases/${DB_ID}/query`,'POST',{page_size:1});
+    localStorage.setItem('sm_token',token);
+    showApp();
+  }catch(e){
+    TOKEN='';btn.disabled=false;btn.textContent='Connecter →';
+    document.getElementById('error-msg').style.display='block';
+  }
+}
+function showApp(){
+  document.getElementById('setup-screen').style.display='none';
+  document.getElementById('app-screen').style.display='block';
+  document.getElementById('settings-tab-btn').style.display='flex';
+  renderTabs();
+  fetchProducts();
+}
+
+// ─── INIT ───
+window.addEventListener('DOMContentLoaded',()=>{
+  const saved=localStorage.getItem('sm_token');
+  if(saved){TOKEN=saved;showApp();}
+
+  document.getElementById('btn-connect').addEventListener('click',connect);
+  document.getElementById('input-token').addEventListener('keydown',e=>{if(e.key==='Enter')connect();});
+  document.getElementById('btn-refresh').addEventListener('click',fetchProducts);
+  document.getElementById('btn-notion').addEventListener('click',()=>window.open(NOTION_PAGE,'_blank'));
+
+  // Settings tab
+  document.getElementById('settings-tab-btn').addEventListener('click',()=>{
+    const isOpen=document.getElementById('settings-panel').style.display==='block';
+    switchTab(isOpen?'shared':'settings');
+  });
+
+  // Add person
+  document.getElementById('btn-add-person').addEventListener('click',()=>{
+    document.getElementById('modal-person-name').value='';
+    document.getElementById('modal-person').style.display='flex';
+    document.getElementById('modal-person-name').focus();
+  });
+  document.getElementById('modal-cancel').addEventListener('click',()=>{document.getElementById('modal-person').style.display='none';});
+  document.getElementById('modal-confirm').addEventListener('click',()=>{
+    const name=document.getElementById('modal-person-name').value.trim();
+    if(!name) return;
+    addPerson(name);
+    document.getElementById('modal-person').style.display='none';
+    showToast(`👤 ${name} ajouté`,'success');
+  });
+  document.getElementById('modal-person-name').addEventListener('keydown',e=>{if(e.key==='Enter') document.getElementById('modal-confirm').click();});
+
+  // Settings actions
+  document.getElementById('btn-add-product').addEventListener('click',addNewProduct);
+  document.getElementById('new-product-name').addEventListener('keydown',e=>{if(e.key==='Enter') addNewProduct();});
+  document.getElementById('btn-reset-all').addEventListener('click',resetAllStocks);
+  document.getElementById('btn-logout').addEventListener('click',()=>{if(confirm('Se déconnecter ?')){localStorage.clear();location.reload();}});
+
+  // Tab shared click
+  document.getElementById('tab-shared').addEventListener('click',()=>switchTab('shared'));
+});
 </script>
 </body>
 </html>
