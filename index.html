@@ -576,12 +576,13 @@ function renderPersonsGrid(){
 // ═══════════════════════════════════════════
 // PERSONNE — DÉTAIL
 // ═══════════════════════════════════════════
-function openPersonDetail(idx){
+async function openPersonDetail(idx){
   currentPersonIdx = idx;
   const p = persons[idx];
   document.getElementById('detail-name').textContent = '👤 ' + p.name;
-  renderPersonDetail();
   switchTab('person-detail');
+  if(!indivProducts.length){ await fetchAll(); }
+  renderPersonDetail();
 }
 
 function renderPersonDetail(){
