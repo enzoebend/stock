@@ -165,31 +165,6 @@
 
     @keyframes slideIn { from{opacity:0;transform:translateY(-8px)} to{opacity:1;transform:translateY(0)} }
 
-    /* User selector */
-    .user-bar {
-      display: flex;
-      gap: 8px;
-      margin-bottom: 18px;
-    }
-    .user-btn {
-      flex: 1;
-      background: var(--surface);
-      border: 1px solid var(--border);
-      border-radius: 8px;
-      color: var(--muted);
-      font-family: var(--mono);
-      font-size: 0.82rem;
-      padding: 10px;
-      cursor: pointer;
-      transition: all 0.2s;
-      text-align: center;
-    }
-    .user-btn.active {
-      background: var(--accent);
-      border-color: var(--accent);
-      color: #fff;
-    }
-
     /* Section title */
     .section-label {
       font-size: 0.68rem;
@@ -445,12 +420,7 @@
     <div id="alert-list"></div>
   </div>
 
-  <div class="user-bar">
-    <button class="user-btn active" data-user="Enzo" id="btn-enzo">👤 Enzo</button>
-    <button class="user-btn" data-user="Aida" id="btn-aida">👤 Aida</button>
-  </div>
-
-  <div class="section-label">Produits — Stock partagé</div>
+  <div class="section-label">Stock partagé</div>
   <div id="products-list">
     <div class="skeleton"></div>
     <div class="skeleton"></div>
@@ -471,24 +441,9 @@
   // ─── CONFIG ───
   const DB_ID = '5fa77d9813c08353941c01d42d74d891';
   const NOTION_PAGE = 'https://app.notion.com/p/b4177d9813c083f5afe5813b3e54ecda';
-  const PROXY = 'https://notion-proxy.vercel.app/api/notion'; // proxy CORS
 
   let TOKEN = '';
   let products = [];
-  let currentUser = 'Enzo';
-  let pageIds = {}; // nom → page_id
-
-  // ─── STORAGE ───
-  function saveConfig(token, dbid) {
-    localStorage.setItem('sm_token', token);
-    localStorage.setItem('sm_dbid', dbid);
-  }
-  function loadConfig() {
-    return {
-      token: localStorage.getItem('sm_token') || '',
-      dbid: localStorage.getItem('sm_dbid') || DB_ID
-    };
-  }
 
   // ─── NOTION API via proxy /api/notion (pas de CORS) ───
   async function notionRequest(endpoint, method = 'GET', body = null) {
@@ -512,26 +467,20 @@
   async function fetchProducts() {
     setSyncStatus('loading', 'Chargement...');
     try {
-      const data = await notionRequest(`databases/${loadConfig().dbid}/query`, 'POST', {
+      const data = await notionRequest(`databases/${DB_ID}/query`, 'POST', {
         sorts: [{ property: 'Quantité dispo', direction: 'ascending' }]
       });
 
       products = data.results.map(p => {
         const props = p.properties;
-        const dispo = props['Quantité dispo']?.number ?? 0;
-        const total = props['Quantité']?.number ?? 10;
-        const lastEdit = props['Dernière utilisation']?.date?.start || null;
         return {
           id: p.id,
           name: props['Nom']?.title?.[0]?.plain_text || '?',
-          dispo,
-          total,
-          lastEdit
+          dispo: props['Quantité dispo']?.number ?? 0,
+          total: props['Quantité']?.number ?? 10,
+          lastEdit: props['Dernière utilisation']?.date?.start || null
         };
       });
-
-      pageIds = {};
-      products.forEach(p => { pageIds[p.name] = p.id; });
 
       renderProducts();
       checkAlerts();
@@ -571,7 +520,7 @@
               <div class="product-qty ${level}">${p.dispo}</div>
               <div>
                 ${badge}
-                <div class="product-last">${lastStr} · par ${currentUser}</div>
+                <div class="product-last">${lastStr}</div>
               </div>
             </div>
             <div class="progress-bar">
@@ -683,23 +632,11 @@
     }
   }
 
-  function showError(msg) {
-    const el = document.getElementById('error-msg');
-    el.textContent = '❌ ' + msg;
-    el.style.display = 'block';
-  }
-
   function showApp() {
     document.getElementById('setup-screen').style.display = 'none';
     document.getElementById('app-screen').style.display = 'block';
     document.getElementById('settings-btn').style.display = 'flex';
     fetchProducts();
-  }
-
-  function showSetup() {
-    document.getElementById('app-screen').style.display = 'none';
-    document.getElementById('setup-screen').style.display = 'block';
-    document.getElementById('settings-btn').style.display = 'none';
   }
 
   // ─── INIT ───
@@ -717,14 +654,6 @@
         TOKEN = '';
         location.reload();
       }
-    });
-    document.querySelectorAll('.user-btn').forEach(btn => {
-      btn.addEventListener('click', () => {
-        document.querySelectorAll('.user-btn').forEach(b => b.classList.remove('active'));
-        btn.classList.add('active');
-        currentUser = btn.dataset.user;
-        renderProducts();
-      });
     });
   });
 </script>
