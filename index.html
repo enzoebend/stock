@@ -166,17 +166,8 @@ const NOTION_PAGE = 'https://app.notion.com/p/b4177d9813c083f5afe5813b3e54ecda';
 
 const INDIV_COLS = ['Brosse à dent','Crème de corps','Dentifrice','Déodorant','Gel douche','Lessive','Savon dur','Serviettes hygiéniques','Shampoing'];
 
-const INDIV_STOCK_IDS = {
-  'Brosse à dent':          '37477d9813c0811db14dcb51c0a82403',
-  'Crème de corps':         '37477d9813c081f09245df5aa661c8ca',
-  'Dentifrice':             '37477d9813c08193b4daeab795ab13bc',
-  'Déodorant':              '37477d9813c0813bb8afc61ecbf2e5c6',
-  'Gel douche':             '37477d9813c0813681a2fdd65073a295',
-  'Lessive':                '37477d9813c081d2b2d3dda57f4919ed',
-  'Savon dur':              '37477d9813c08160affbe4482163c3f2',
-  'Serviettes hygiéniques': '37477d9813c081faa3f8f422008d0135',
-  'Shampoing':              '37477d9813c08160bf9ffc5d1a4c6116',
-};
+// IDs récupérés dynamiquement au chargement depuis Notion
+let INDIV_STOCK_IDS = {};
 
 const DEFAULT_PERSONS = [
   "Lea Ida","TIBENG Destine Ngwe","DOUMOUBYA Seydou","ZIYAMA JOAO Graciana",
@@ -204,19 +195,20 @@ let currentPersonId = null;
 // PERSONS — localStorage
 // ══════════════════════════════════════
 function loadPersons(){
-  const saved = localStorage.getItem('sm_persons_v2');
+  const saved = localStorage.getItem('sm_persons_v3');
   if(saved){
     persons = JSON.parse(saved);
   } else {
+    // Initialise à 2 par produit (quota de départ)
     persons = DEFAULT_PERSONS.map((name,i) => ({
       id: 'local_'+i,
       name,
-      stocks: Object.fromEntries(INDIV_COLS.map(c=>[c,0]))
+      stocks: Object.fromEntries(INDIV_COLS.map(c=>[c,2]))
     }));
     savePersons();
   }
 }
-function savePersons(){ localStorage.setItem('sm_persons_v2', JSON.stringify(persons)); }
+function savePersons(){ localStorage.setItem('sm_persons_v3', JSON.stringify(persons)); }
 
 // ══════════════════════════════════════
 // API
@@ -244,13 +236,18 @@ async function fetchShared(){
     total: p.properties['Quantité']?.number??10,
     lastEdit: p.properties['Dernière utilisation']?.date?.start||null
   }));
-  // Sépare partagé vs individuel
-  const indivIds = Object.values(INDIV_STOCK_IDS);
-  sharedProducts = allPages.filter(p=>!indivIds.includes(p.id));
-  // Met à jour indivStocks
-  allPages.filter(p=>indivIds.includes(p.id)).forEach(p=>{
-    indivStocks[p.id] = p;
+
+  // Identifie les produits individuels par leur nom
+  INDIV_STOCK_IDS = {};
+  allPages.forEach(p => {
+    if(INDIV_COLS.includes(p.name)){
+      INDIV_STOCK_IDS[p.name] = p.id;
+      indivStocks[p.id] = p;
+    }
   });
+
+  // Produits partagés = tout ce qui n'est pas dans INDIV_COLS
+  sharedProducts = allPages.filter(p => !INDIV_COLS.includes(p.name));
 }
 
 // ══════════════════════════════════════
