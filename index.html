@@ -2,285 +2,320 @@
 <html lang="fr">
 <head>
   <meta charset="UTF-8"/>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0"/>
-  <title>Bernanos — Stock</title>
-  <link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Syne:wght@700;800&display=swap" rel="stylesheet"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, viewport-fit=cover"/>
+  <title>Intendance — Centre Bernanos</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com"/>
+  <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,600;9..144,700&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet"/>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
   <style>
     *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
     :root{
-      --bg:#0f0f0f;--surface:#1a1a1a;--surface2:#242424;--border:#2e2e2e;
-      --text:#f0f0f0;--muted:#666;--ok:#2ecc71;--warn:#f39c12;--danger:#e74c3c;--accent:#4f8ef7;
-      --mono:'DM Mono',monospace;--display:'Syne',sans-serif;
+      /* Palette : intendance / propre / institutionnel chaleureux */
+      --ink:#14201c;          /* vert très sombre, texte */
+      --paper:#f7f5ef;        /* crème papier */
+      --paper2:#efece2;       /* crème ombré */
+      --line:#d9d4c6;         /* lignes */
+      --sage:#3f7256;         /* vert sauge — accent principal */
+      --sage-d:#2c5840;       /* vert foncé */
+      --sage-l:#e8efe9;       /* vert pâle fond */
+      --amber:#c8821f;        /* ambre — stock bas */
+      --amber-l:#faf0dd;
+      --rust:#b4452f;         /* rouge brique — urgent */
+      --rust-l:#f8e5e0;
+      --muted:#7d8579;        /* gris-vert texte secondaire */
+      --white:#fffefb;
+      --display:'Fraunces',Georgia,serif;
+      --body:'Inter',system-ui,sans-serif;
+      --mono:'JetBrains Mono',monospace;
+      --shadow:0 1px 2px rgba(20,32,28,.04),0 2px 8px rgba(20,32,28,.06);
+      --shadow-lg:0 4px 24px rgba(20,32,28,.10);
     }
-    body{background:var(--bg);color:var(--text);font-family:var(--mono);min-height:100vh}
+    body{background:var(--paper);color:var(--ink);font-family:var(--body);min-height:100vh;-webkit-font-smoothing:antialiased}
 
-    /* ── HEADER ── */
-    header{background:var(--surface);border-bottom:1px solid var(--border);padding:12px 16px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:100}
-    .logo{width:34px;height:34px;border-radius:50%;background:var(--accent);display:flex;align-items:center;justify-content:center;font-family:var(--display);font-weight:800;font-size:0.85rem;color:#fff;flex-shrink:0}
-    header h1{font-family:var(--display);font-size:1.05rem;font-weight:800;letter-spacing:-0.5px;margin-left:10px}
-    header h1 span{color:var(--accent)}
-    .sync{font-size:0.68rem;color:var(--muted);display:flex;align-items:center;gap:6px}
-    .dot{width:7px;height:7px;border-radius:50%;background:var(--muted);transition:background 0.3s;flex-shrink:0}
-    .dot.ok{background:var(--ok)}.dot.loading{background:var(--warn);animation:pulse 1s infinite}.dot.error{background:var(--danger)}
-    @keyframes pulse{0%,100%{opacity:1}50%{opacity:0.3}}
+    /* ─── HEADER ─── */
+    header{background:var(--white);border-bottom:1px solid var(--line);padding:14px 18px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:100;padding-top:max(14px,env(safe-area-inset-top))}
+    .brand{display:flex;align-items:center;gap:11px}
+    .crest{width:38px;height:38px;border-radius:10px;background:var(--sage);display:flex;align-items:center;justify-content:center;flex-shrink:0;box-shadow:var(--shadow)}
+    .crest svg{width:21px;height:21px}
+    .brand-txt h1{font-family:var(--display);font-size:1.08rem;font-weight:600;line-height:1;letter-spacing:-0.01em}
+    .brand-txt .sub{font-size:0.64rem;color:var(--muted);letter-spacing:0.08em;text-transform:uppercase;margin-top:3px;font-weight:500}
+    .sync{display:flex;align-items:center;gap:6px;font-size:0.66rem;color:var(--muted);font-family:var(--mono)}
+    .dot{width:7px;height:7px;border-radius:50%;background:var(--muted);transition:.3s;flex-shrink:0}
+    .dot.ok{background:var(--sage)}.dot.loading{background:var(--amber);animation:pulse 1s infinite}.dot.error{background:var(--rust)}
+    @keyframes pulse{0%,100%{opacity:1}50%{opacity:.3}}
 
-    /* ── SETUP ── */
-    #setup{padding:40px 20px;max-width:460px;margin:0 auto}
-    #setup h2{font-family:var(--display);font-size:1.4rem;margin-bottom:6px}
-    #setup p{color:var(--muted);font-size:0.8rem;margin-bottom:24px;line-height:1.6}
-    .field label{display:block;font-size:0.7rem;color:var(--muted);margin-bottom:5px;text-transform:uppercase;letter-spacing:1px}
-    .field input{width:100%;background:var(--surface);border:1px solid var(--border);border-radius:8px;color:var(--text);font-family:var(--mono);font-size:0.82rem;padding:11px 13px;outline:none;transition:border-color 0.2s;margin-bottom:14px}
-    .field input:focus{border-color:var(--accent)}.field input::placeholder{color:var(--muted)}
-    .btn-connect{width:100%;background:var(--accent);color:#fff;border:none;border-radius:8px;font-family:var(--display);font-size:0.9rem;font-weight:700;padding:13px;cursor:pointer}
-    .btn-connect:disabled{opacity:0.5;cursor:not-allowed}
-    .help{background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:13px 15px;margin-top:18px;font-size:0.73rem;color:var(--muted);line-height:1.7}
-    .help a{color:var(--accent);text-decoration:none}.help strong{color:var(--text)}
-    #err{color:var(--danger);font-size:0.75rem;margin-top:8px;display:none}
+    /* ─── SETUP ─── */
+    #setup{padding:48px 22px;max-width:440px;margin:0 auto}
+    .setup-crest{width:60px;height:60px;border-radius:16px;background:var(--sage);display:flex;align-items:center;justify-content:center;margin-bottom:22px;box-shadow:var(--shadow-lg)}
+    .setup-crest svg{width:32px;height:32px}
+    #setup h2{font-family:var(--display);font-size:1.7rem;font-weight:600;letter-spacing:-0.02em;margin-bottom:7px}
+    #setup .lead{color:var(--muted);font-size:0.88rem;margin-bottom:28px;line-height:1.55}
+    .field label{display:block;font-size:0.68rem;color:var(--muted);margin-bottom:7px;text-transform:uppercase;letter-spacing:0.09em;font-weight:600}
+    .field input{width:100%;background:var(--white);border:1px solid var(--line);border-radius:11px;color:var(--ink);font-family:var(--mono);font-size:0.85rem;padding:13px 15px;outline:none;transition:.2s;box-shadow:var(--shadow)}
+    .field input:focus{border-color:var(--sage);box-shadow:0 0 0 3px var(--sage-l)}
+    .field input::placeholder{color:#b3b8ac}
+    .btn{width:100%;border:none;border-radius:11px;font-family:var(--body);font-size:0.92rem;font-weight:600;padding:14px;cursor:pointer;transition:.2s}
+    .btn-go{background:var(--sage);color:var(--white);margin-top:16px;box-shadow:var(--shadow)}
+    .btn-go:hover{background:var(--sage-d)}.btn-go:disabled{opacity:.5;cursor:not-allowed}
+    .btn-ghost{background:var(--white);border:1px solid var(--line);color:var(--ink);margin-top:10px;box-shadow:var(--shadow)}
+    .btn-ghost:hover{border-color:var(--sage);color:var(--sage)}
+    #err{color:var(--rust);font-size:0.78rem;margin-top:11px;display:none;font-weight:500}
+    .help{background:var(--sage-l);border-radius:11px;padding:15px 17px;margin-top:24px;font-size:0.76rem;color:var(--sage-d);line-height:1.7}
+    .help a{color:var(--sage-d);font-weight:600}.help code{background:var(--white);padding:1px 6px;border-radius:5px;font-family:var(--mono);font-size:0.72rem}
 
-    /* ── APP ── */
-    #app{display:none}
-    .tabs{background:var(--surface);border-bottom:1px solid var(--border);display:flex;overflow-x:auto;scrollbar-width:none}
+    /* ─── APP ─── */
+    #app{display:none;padding-bottom:40px}
+    .tabs{background:var(--white);border-bottom:1px solid var(--line);display:flex;overflow-x:auto;scrollbar-width:none;position:sticky;top:67px;z-index:90}
     .tabs::-webkit-scrollbar{display:none}
-    .tab{flex-shrink:0;padding:11px 14px;font-family:var(--mono);font-size:0.75rem;color:var(--muted);border:none;background:none;cursor:pointer;border-bottom:2px solid transparent;transition:all 0.2s;white-space:nowrap}
-    .tab.on{color:var(--accent);border-bottom-color:var(--accent)}.tab:hover:not(.on){color:var(--text)}
+    .tab{flex-shrink:0;padding:13px 17px;font-family:var(--body);font-size:0.81rem;font-weight:500;color:var(--muted);border:none;background:none;cursor:pointer;border-bottom:2.5px solid transparent;transition:.2s;white-space:nowrap;display:flex;align-items:center;gap:6px}
+    .tab.on{color:var(--sage-d);border-bottom-color:var(--sage)}
+    .tab:hover:not(.on){color:var(--ink)}
+    .tab svg{width:15px;height:15px}
 
-    .view{padding:14px 16px;max-width:580px;margin:0 auto;display:none}
+    .view{padding:18px;max-width:600px;margin:0 auto;display:none;animation:fade .3s ease}
     .view.on{display:block}
+    @keyframes fade{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:translateY(0)}}
 
-    /* ── ALERTES ── */
-    .banner{display:none;background:#1a0808;border:1px solid var(--danger);border-radius:9px;padding:11px 14px;margin-bottom:12px;font-size:0.75rem;color:#ff8a80;line-height:1.7}
+    /* ─── SECTION HEAD ─── */
+    .shead{margin-bottom:16px}
+    .shead h2{font-family:var(--display);font-size:1.32rem;font-weight:600;letter-spacing:-0.015em;line-height:1.1}
+    .shead p{font-size:0.8rem;color:var(--muted);margin-top:4px;line-height:1.5}
+
+    /* ─── BANNER ─── */
+    .banner{display:none;background:var(--rust-l);border:1px solid #eccabf;border-radius:12px;padding:13px 16px;margin-bottom:16px}
     .banner.on{display:block}
-    .banner-title{font-family:var(--display);font-size:0.8rem;color:var(--danger);margin-bottom:4px}
+    .banner.amber{background:var(--amber-l);border-color:#ecd9b0}
+    .banner-h{font-family:var(--display);font-size:0.86rem;font-weight:600;color:var(--rust);margin-bottom:5px;display:flex;align-items:center;gap:6px}
+    .banner.amber .banner-h{color:var(--amber)}
+    .banner-body{font-size:0.78rem;color:var(--ink);line-height:1.7}
+    .banner-body strong{font-weight:600}
 
-    /* ── CARDS PRODUITS ── */
-    .cards{display:flex;flex-direction:column;gap:9px}
-    .card{background:var(--surface);border:1px solid var(--border);border-radius:11px;padding:12px 14px;display:grid;grid-template-columns:1fr auto;align-items:center;gap:10px;position:relative;overflow:hidden}
-    .card::before{content:'';position:absolute;left:0;top:0;bottom:0;width:3px;background:var(--ok);border-radius:3px 0 0 3px}
-    .card.warn::before{background:var(--warn)}.card.danger::before{background:var(--danger)}
-    .card.warn{border-color:#3d2e0a}.card.danger{border-color:#3d0a0a}
-    .card-name{font-family:var(--display);font-size:0.87rem;font-weight:700;margin-bottom:3px}
-    .card-row{display:flex;align-items:center;gap:8px}
-    .card-num{font-size:1.3rem;font-weight:500;line-height:1}
-    .card-num.ok{color:var(--ok)}.card-num.warn{color:var(--warn)}.card-num.danger{color:var(--danger)}
-    .card-total{font-size:0.62rem;color:var(--muted)}
-    .tag{font-size:0.6rem;padding:2px 7px;border-radius:4px;font-weight:500;display:inline-block}
-    .tag-ok{background:#0d2e1a;color:var(--ok)}.tag-warn{background:#2e1f00;color:var(--warn)}.tag-danger{background:#2e0808;color:var(--danger)}
-    .card-sub{font-size:0.62rem;color:var(--muted);margin-top:2px}
-    .bar{height:3px;background:var(--border);border-radius:2px;margin-top:6px;overflow:hidden}
-    .bar-fill{height:100%;border-radius:2px;transition:width 0.4s,background 0.3s}
-    .btns{display:flex;flex-direction:column;gap:5px}
-    .b{width:34px;height:34px;border-radius:8px;border:1px solid var(--border);background:var(--surface2);color:var(--text);font-size:1.1rem;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all 0.15s;font-family:var(--mono)}
-    .b:active{transform:scale(0.9)}.b:disabled{opacity:0.25;cursor:not-allowed;transform:none}
-    .b.p{color:var(--ok);border-color:#0d2e1a}.b.p:hover{background:#0d2e1a}
-    .b.m{color:var(--danger);border-color:#3d0a0a}.b.m:hover{background:#2e0808}
+    /* ─── STATS ─── */
+    .stats{display:grid;grid-template-columns:repeat(3,1fr);gap:9px;margin-bottom:18px}
+    .stat{background:var(--white);border:1px solid var(--line);border-radius:13px;padding:13px 14px;box-shadow:var(--shadow)}
+    .stat-n{font-family:var(--display);font-size:1.6rem;font-weight:600;line-height:1;letter-spacing:-0.02em}
+    .stat-l{font-size:0.62rem;color:var(--muted);margin-top:5px;text-transform:uppercase;letter-spacing:0.06em;font-weight:600}
 
-    /* ── SKELETON ── */
-    .sk{background:var(--surface);border:1px solid var(--border);border-radius:11px;height:80px;animation:sh 1.4s infinite;margin-bottom:9px}
-    @keyframes sh{0%,100%{opacity:0.35}50%{opacity:0.7}}
+    /* ─── CARDS ─── */
+    .cards{display:flex;flex-direction:column;gap:10px}
+    .card{background:var(--white);border:1px solid var(--line);border-radius:14px;padding:15px 16px;display:grid;grid-template-columns:1fr auto;align-items:center;gap:12px;box-shadow:var(--shadow);position:relative;overflow:hidden;transition:.2s}
+    .card::before{content:'';position:absolute;left:0;top:0;bottom:0;width:4px;background:var(--sage)}
+    .card.warn::before{background:var(--amber)}.card.danger::before{background:var(--rust)}
+    .card-name{font-family:var(--display);font-size:1rem;font-weight:600;letter-spacing:-0.01em;margin-bottom:5px;display:flex;align-items:center;gap:7px;flex-wrap:wrap}
+    .card-line{display:flex;align-items:baseline;gap:7px;margin-bottom:3px}
+    .card-num{font-family:var(--mono);font-size:1.5rem;font-weight:700;line-height:1;color:var(--sage)}
+    .card-num.warn{color:var(--amber)}.card-num.danger{color:var(--rust)}
+    .card-den{font-family:var(--mono);font-size:0.74rem;color:var(--muted)}
+    .pill{font-size:0.62rem;padding:3px 9px;border-radius:20px;font-weight:600;letter-spacing:0.02em}
+    .pill-ok{background:var(--sage-l);color:var(--sage-d)}
+    .pill-warn{background:var(--amber-l);color:var(--amber)}
+    .pill-danger{background:var(--rust-l);color:var(--rust)}
+    .card-sub{font-size:0.7rem;color:var(--muted);margin-top:3px}
+    .card-sub strong{color:var(--ink);font-weight:600}
+    .bar{height:4px;background:var(--paper2);border-radius:3px;margin-top:9px;overflow:hidden}
+    .bar-fill{height:100%;border-radius:3px;transition:width .45s cubic-bezier(.4,0,.2,1),background .3s}
 
-    /* ── STATS ── */
-    .stats{display:grid;grid-template-columns:repeat(3,1fr);gap:7px;margin-bottom:12px}
-    .stat{background:var(--surface);border:1px solid var(--border);border-radius:9px;padding:10px 12px}
-    .stat-n{font-size:1.45rem;font-weight:500;font-family:var(--display);line-height:1}
-    .stat-l{font-size:0.58rem;color:var(--muted);margin-top:2px;text-transform:uppercase;letter-spacing:0.8px}
+    /* ─── CONTROLS ─── */
+    .ctl{display:flex;flex-direction:column;align-items:center;gap:6px}
+    .stepper{display:flex;flex-direction:column;align-items:center;background:var(--paper);border:1px solid var(--line);border-radius:12px;overflow:hidden}
+    .step{width:42px;height:38px;border:none;background:none;font-size:1.25rem;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:.12s;color:var(--ink);font-family:var(--mono);line-height:1}
+    .step:active{transform:scale(.88)}.step:disabled{opacity:.25;cursor:not-allowed;transform:none}
+    .step.plus{color:var(--sage)}.step.plus:hover:not(:disabled){background:var(--sage-l)}
+    .step.minus{color:var(--rust)}.step.minus:hover:not(:disabled){background:var(--rust-l)}
+    .step-val{font-family:var(--mono);font-weight:700;font-size:1.05rem;padding:5px 0;min-width:42px;text-align:center;cursor:pointer;color:var(--ink);border-top:1px solid var(--line);border-bottom:1px solid var(--line);width:100%;transition:.15s;user-select:none}
+    .step-val:hover{background:var(--sage-l);color:var(--sage-d)}
+    .step-val.editing{background:var(--white)}
+    .step-input{font-family:var(--mono);font-weight:700;font-size:1.05rem;width:42px;text-align:center;border:none;outline:none;background:var(--white);padding:5px 0;border-top:1px solid var(--sage);border-bottom:1px solid var(--sage);color:var(--sage-d)}
+    .mini-reset{font-size:0.66rem;color:var(--muted);background:none;border:none;cursor:pointer;padding:2px;display:flex;align-items:center;gap:3px;transition:.15s}
+    .mini-reset:hover{color:var(--rust)}
 
-    /* ── GRILLE PERSONNES ── */
-    .pgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:7px}
-    .pchip{background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:9px 11px;cursor:pointer;display:flex;align-items:center;justify-content:space-between;transition:border-color 0.15s}
-    .pchip:hover{border-color:var(--accent)}.pchip.done{border-color:var(--ok)}
-    .pname{font-size:0.74rem;font-weight:500;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;min-width:0}
-    .pcount{font-size:0.6rem;color:var(--muted);margin-top:1px}
+    .btns-simple{display:flex;flex-direction:column;gap:6px}
+    .bsq{width:40px;height:38px;border-radius:10px;border:1px solid var(--line);background:var(--paper);font-size:1.2rem;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:.12s;font-family:var(--mono);color:var(--ink)}
+    .bsq:active{transform:scale(.9)}.bsq:disabled{opacity:.25;cursor:not-allowed;transform:none}
+    .bsq.plus{color:var(--sage)}.bsq.plus:hover:not(:disabled){background:var(--sage-l);border-color:var(--sage)}
+    .bsq.minus{color:var(--rust)}.bsq.minus:hover:not(:disabled){background:var(--rust-l);border-color:var(--rust)}
 
-    /* ── DÉTAIL PERSONNE ── */
-    .back-row{display:flex;align-items:center;gap:9px;margin-bottom:12px}
-    .ptitle{font-family:var(--display);font-size:0.95rem;font-weight:700}
+    /* ─── PERSONS GRID ─── */
+    .pgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(158px,1fr));gap:9px}
+    .pchip{background:var(--white);border:1px solid var(--line);border-radius:13px;padding:13px 14px;cursor:pointer;box-shadow:var(--shadow);transition:.18s;position:relative;overflow:hidden}
+    .pchip::before{content:'';position:absolute;left:0;top:0;bottom:0;width:3px;background:transparent;transition:.2s}
+    .pchip:hover{transform:translateY(-1px);box-shadow:var(--shadow-lg)}
+    .pchip.done::before{background:var(--sage)}
+    .pchip.over::before{background:var(--amber)}
+    .pchip-top{display:flex;align-items:center;justify-content:space-between;margin-bottom:6px}
+    .pchip-name{font-family:var(--display);font-size:0.86rem;font-weight:600;letter-spacing:-0.01em;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;min-width:0}
+    .pchip-meta{font-size:0.68rem;color:var(--muted);font-family:var(--mono)}
+    .pchip-badge{font-size:0.85rem;flex-shrink:0;margin-left:6px}
 
-    /* ── BOTTOM BAR ── */
-    .bbar{margin-top:16px;display:flex;gap:8px}
-    .btn-sec{flex:1;background:var(--surface);border:1px solid var(--border);border-radius:7px;color:var(--muted);font-family:var(--mono);font-size:0.73rem;padding:9px;cursor:pointer;text-align:center;transition:all 0.2s}
-    .btn-sec:hover{border-color:var(--accent);color:var(--accent)}
-    .btn-red{background:none;border:1px solid #3d0a0a;border-radius:6px;color:var(--danger);font-family:var(--mono);font-size:0.7rem;padding:5px 9px;cursor:pointer}
-    .btn-red:hover{background:#2e0808}
+    /* ─── DETAIL ─── */
+    .back-row{display:flex;align-items:center;gap:11px;margin-bottom:18px}
+    .btn-back{flex-shrink:0;background:var(--white);border:1px solid var(--line);border-radius:10px;padding:9px 13px;font-family:var(--body);font-size:0.78rem;font-weight:500;color:var(--ink);cursor:pointer;box-shadow:var(--shadow);transition:.15s;display:flex;align-items:center;gap:5px}
+    .btn-back:hover{border-color:var(--sage);color:var(--sage)}
+    .detail-title{font-family:var(--display);font-size:1.18rem;font-weight:600;letter-spacing:-0.015em;min-width:0}
 
-    /* ── LABEL ── */
-    .lbl{font-size:0.62rem;color:var(--muted);text-transform:uppercase;letter-spacing:1.4px;margin-bottom:9px;margin-top:3px}
+    /* ─── BOTTOM ─── */
+    .bbar{margin-top:18px;display:flex;gap:9px}
+    .btn-bar{flex:1;background:var(--white);border:1px solid var(--line);border-radius:11px;color:var(--ink);font-family:var(--body);font-size:0.78rem;font-weight:500;padding:11px;cursor:pointer;box-shadow:var(--shadow);transition:.15s}
+    .btn-bar:hover{border-color:var(--sage);color:var(--sage)}
 
-    /* ── TOAST ── */
-    #toast{position:fixed;bottom:20px;left:50%;transform:translateX(-50%) translateY(80px);background:var(--surface2);border:1px solid var(--border);border-radius:9px;padding:10px 17px;font-size:0.77rem;color:var(--text);transition:transform 0.3s cubic-bezier(0.34,1.56,0.64,1);z-index:999;white-space:nowrap;max-width:92vw;text-align:center}
+    /* ─── QR MODAL ─── */
+    .modal{display:none;position:fixed;inset:0;background:rgba(20,32,28,.55);backdrop-filter:blur(3px);z-index:300;align-items:center;justify-content:center;padding:24px}
+    .modal.on{display:flex;animation:fade .2s ease}
+    .modal-box{background:var(--white);border-radius:18px;padding:26px;max-width:330px;width:100%;text-align:center;box-shadow:var(--shadow-lg)}
+    .modal-box h3{font-family:var(--display);font-size:1.15rem;font-weight:600;margin-bottom:5px}
+    .modal-box .mp{font-size:0.78rem;color:var(--muted);margin-bottom:18px;line-height:1.5}
+    #qr-box{background:var(--white);padding:14px;border-radius:12px;display:inline-block;margin-bottom:16px;border:1px solid var(--line)}
+    .modal-warn{font-size:0.7rem;color:var(--rust);margin-bottom:16px;font-weight:500}
+
+    /* ─── TOAST ─── */
+    #toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%) translateY(90px);background:var(--ink);color:var(--white);border-radius:12px;padding:12px 20px;font-size:0.82rem;font-weight:500;transition:transform .35s cubic-bezier(.34,1.56,.64,1);z-index:999;white-space:nowrap;max-width:92vw;text-align:center;box-shadow:var(--shadow-lg)}
     #toast.on{transform:translateX(-50%) translateY(0)}
-    #toast.ok{border-color:var(--ok);color:var(--ok)}
-    #toast.err{border-color:var(--danger);color:var(--danger)}
-    #toast.warn{border-color:var(--warn);color:var(--warn)}
+    #toast.ok{background:var(--sage-d)}
+    #toast.err{background:var(--rust)}
+    #toast.warn{background:var(--amber)}
 
-    @media(min-width:580px){header{padding:12px 24px}.view{padding:18px 24px}}
+    .sk{background:var(--white);border:1px solid var(--line);border-radius:14px;height:88px;margin-bottom:10px;position:relative;overflow:hidden}
+    .sk::after{content:'';position:absolute;inset:0;background:linear-gradient(90deg,transparent,var(--paper2),transparent);animation:shimmer 1.5s infinite}
+    @keyframes shimmer{0%{transform:translateX(-100%)}100%{transform:translateX(100%)}}
+
+    @media(min-width:600px){header{padding:16px 28px}.tabs{top:75px}.view{padding:24px 28px}}
   </style>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
 </head>
 <body>
 
 <header>
-  <div style="display:flex;align-items:center">
-    <div class="logo">B</div>
-    <h1>Bernanos<span>.</span></h1>
-  </div>
-  <div style="display:flex;align-items:center;gap:8px">
-    <div class="sync"><div class="dot" id="dot"></div><span id="sync-lbl">—</span></div>
-  </div>
-</header>
-
-<!-- SETUP -->
-<div id="setup">
-  <h2>Connexion</h2>
-  <p>Entre ton token Notion pour accéder aux stocks.</p>
-  <div class="field">
-    <label>Token Notion</label>
-    <input type="password" id="token-input" placeholder="ntn_xxxxxxxxxxxx" autocomplete="off"/>
-  </div>
-  <button class="btn-connect" id="btn-conn">Connecter →</button>
-  <div id="err">❌ Token invalide ou accès refusé.</div>
-
-  <div style="margin-top:14px;display:flex;gap:8px">
-    <button class="btn-connect" id="btn-gen-qr" style="background:var(--surface);border:1px solid var(--border);color:var(--muted);font-family:var(--mono);font-size:0.8rem;font-weight:400">
-      📱 Générer QR code
-    </button>
-  </div>
-
-  <!-- QR code modal -->
-  <div id="qr-modal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.85);z-index:300;align-items:center;justify-content:center;padding:20px">
-    <div style="background:var(--surface);border:1px solid var(--border);border-radius:14px;padding:24px;max-width:320px;width:100%;text-align:center">
-      <div style="font-family:var(--display);font-size:1rem;font-weight:700;margin-bottom:4px">QR Code de connexion</div>
-      <div style="font-size:0.72rem;color:var(--muted);margin-bottom:16px">Scanne avec l'autre appareil pour te connecter automatiquement</div>
-      <div id="qr-box" style="background:#fff;padding:12px;border-radius:8px;display:inline-block;margin-bottom:16px"></div>
-      <div style="font-size:0.68rem;color:var(--danger);margin-bottom:14px">⚠️ Ce QR code contient ton token. Ne le partage pas.</div>
-      <button onclick="document.getElementById('qr-modal').style.display='none'" style="background:var(--surface2);border:1px solid var(--border);border-radius:7px;color:var(--muted);font-family:var(--mono);font-size:0.8rem;padding:9px 18px;cursor:pointer;width:100%">Fermer</button>
+  <div class="brand">
+    <div class="crest">
+      <svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><path d="M9 22V12h6v10"/>
+      </svg>
+    </div>
+    <div class="brand-txt">
+      <h1>Intendance</h1>
+      <div class="sub">Centre Bernanos</div>
     </div>
   </div>
+  <div class="sync"><span class="dot" id="dot"></span><span id="sync-lbl">—</span></div>
+</header>
 
+<!-- ─── SETUP ─── -->
+<div id="setup">
+  <div class="setup-crest">
+    <svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+      <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><path d="M9 22V12h6v10"/>
+    </svg>
+  </div>
+  <h2>Bienvenue</h2>
+  <p class="lead">Connecte-toi à Notion pour gérer les stocks du centre. Une seule fois par appareil.</p>
+  <div class="field">
+    <label>Token d'intégration Notion</label>
+    <input type="password" id="token-input" placeholder="ntn_xxxxxxxxxxxx" autocomplete="off"/>
+  </div>
+  <button class="btn btn-go" id="btn-conn">Se connecter</button>
+  <button class="btn btn-ghost" id="btn-gen-qr">📱 Générer un QR code pour un autre appareil</button>
+  <div id="err">Token invalide ou accès refusé. Vérifie le token.</div>
   <div class="help">
-    <strong>Token</strong> : <a href="https://www.notion.so/my-integrations" target="_blank">notion.so/my-integrations</a> → copie le secret <code style="background:#222;padding:1px 5px;border-radius:3px">ntn_xxx</code><br>
-    <strong>⚠️ Ne partage jamais ton token.</strong>
+    Trouve ton token sur <a href="https://www.notion.so/my-integrations" target="_blank">notion.so/my-integrations</a> → ouvre ton intégration → copie le secret <code>ntn_…</code><br><br>
+    Garde ce token privé : il donne accès à tes données Notion.
   </div>
 </div>
 
-<!-- APP -->
+<!-- ─── APP ─── -->
 <div id="app">
   <div class="tabs">
-    <button class="tab on" data-v="shared">📦 Stock partagé</button>
-    <button class="tab" data-v="indiv">🧴 Stock individuel</button>
-    <button class="tab" data-v="persons">👥 Personnes</button>
+    <button class="tab on" data-v="shared">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/></svg>
+      Stock partagé
+    </button>
+    <button class="tab" data-v="indiv">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M12 2v20M2 12h20"/></svg>
+      Fournitures
+    </button>
+    <button class="tab" data-v="persons">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+      Jeunes
+    </button>
   </div>
 
-  <!-- ═══ STOCK PARTAGÉ ═══ -->
-  <!--
-    Ce sont les produits communs de la résidence (Produit WC, Liquide vitres, etc.)
-    Les jeunes et l'équipe se servent librement.
-    On décrémente manuellement avec le bouton − quand un produit est utilisé.
-    On incrémente avec + si on fait une erreur ou reçoit du stock.
-  -->
+  <!-- STOCK PARTAGÉ -->
   <div id="view-shared" class="view on">
-    <div class="banner" id="banner-shared">
-      <div class="banner-title">⚠️ Produits à commander</div>
-      <div id="banner-shared-list"></div>
+    <div class="shead">
+      <h2>Stock partagé</h2>
+      <p>Produits communs en libre service. Retire au stock quand un produit est utilisé.</p>
     </div>
-    <div class="lbl">Produits communs de la résidence</div>
-    <div class="cards" id="shared-cards">
-      <div class="sk"></div><div class="sk"></div><div class="sk"></div>
-    </div>
+    <div class="banner" id="banner-shared"><div class="banner-h">⚠ À commander</div><div class="banner-body" id="banner-shared-list"></div></div>
+    <div class="cards" id="shared-cards"><div class="sk"></div><div class="sk"></div><div class="sk"></div></div>
     <div class="bbar">
-      <button class="btn-sec" id="btn-refresh-shared">↻ Actualiser</button>
-      <button class="btn-sec" onclick="window.open('https://app.notion.com/p/b4177d9813c083f5afe5813b3e54ecda','_blank')">Notion ↗</button>
+      <button class="btn-bar" id="btn-refresh-shared">↻ Actualiser</button>
+      <button class="btn-bar" onclick="window.open('https://app.notion.com/p/b4177d9813c083f5afe5813b3e54ecda','_blank')">Ouvrir Notion ↗</button>
     </div>
   </div>
 
-  <!-- ═══ STOCK INDIVIDUEL ═══ -->
-  <!--
-    9 fournitures imposées aux jeunes (Brosse à dent, Dentifrice, etc.)
-    Chaque produit a un stock global (total disponible à distribuer).
-    Quand on donne 1 produit à quelqu'un : stock global −1.
-    Le compteur par personne permet de voir qui prend combien.
-    Seuil de surconsommation = dépasse le quota normal.
-  -->
+  <!-- FOURNITURES -->
   <div id="view-indiv" class="view">
-    <div class="banner" id="banner-indiv">
-      <div class="banner-title">⚠️ Stock à renouveler</div>
-      <div id="banner-indiv-list"></div>
+    <div class="shead">
+      <h2>Fournitures</h2>
+      <p>Stock global des fournitures distribuées aux jeunes.</p>
     </div>
-    <div class="stats" id="indiv-stats">
-      <div class="stat"><div class="stat-n" id="s-total">—</div><div class="stat-l">Stock total</div></div>
-      <div class="stat"><div class="stat-n" id="s-given" style="color:var(--accent)">—</div><div class="stat-l">Distribués</div></div>
-      <div class="stat"><div class="stat-n" id="s-alert" style="color:var(--danger)">—</div><div class="stat-l">En alerte</div></div>
-    </div>
-    <div class="lbl">9 fournitures — stock global</div>
-    <div class="cards" id="indiv-cards">
-      <div class="sk"></div><div class="sk"></div><div class="sk"></div>
-    </div>
-    <div class="bbar">
-      <button class="btn-sec" id="btn-refresh-indiv">↻ Actualiser</button>
-    </div>
-  </div>
-
-  <!-- ═══ PERSONNES ═══ -->
-  <!--
-    Grille des 38 jeunes. Cliquer sur un jeune ouvre son détail.
-    On voit combien de chaque fourniture il a reçu au total.
-    Si quelqu'un dépasse le quota normal, c'est visible (surconsommation).
-  -->
-  <div id="view-persons" class="view">
+    <div class="banner amber" id="banner-indiv"><div class="banner-h">⚠ À renouveler</div><div class="banner-body" id="banner-indiv-list"></div></div>
     <div class="stats">
-      <div class="stat"><div class="stat-n" id="p-total">38</div><div class="stat-l">Jeunes</div></div>
-      <div class="stat"><div class="stat-n" id="p-given" style="color:var(--accent)">0</div><div class="stat-l">Produits donnés</div></div>
-      <div class="stat"><div class="stat-n" id="p-over" style="color:var(--danger)">0</div><div class="stat-l">Surconsomm.</div></div>
+      <div class="stat"><div class="stat-n" id="s-total" style="color:var(--sage)">—</div><div class="stat-l">En stock</div></div>
+      <div class="stat"><div class="stat-n" id="s-given" style="color:var(--ink)">—</div><div class="stat-l">Distribués</div></div>
+      <div class="stat"><div class="stat-n" id="s-alert" style="color:var(--rust)">—</div><div class="stat-l">En alerte</div></div>
     </div>
-    <div class="lbl">Clique sur un jeune pour gérer son stock</div>
-    <div class="pgrid" id="pgrid"></div>
-    <div class="bbar">
-      <button class="btn-sec" id="btn-refresh-persons">↻ Actualiser</button>
-    </div>
+    <div class="cards" id="indiv-cards"><div class="sk"></div><div class="sk"></div><div class="sk"></div></div>
+    <div class="bbar"><button class="btn-bar" id="btn-refresh-indiv">↻ Actualiser</button></div>
   </div>
 
-  <!-- ═══ DÉTAIL PERSONNE ═══ -->
-  <!--
-    Vue détaillée d'un jeune.
-    + = on lui donne 1 produit → son compteur monte de 1, le stock global descend de 1.
-    − = on annule une erreur de saisie → son compteur descend de 1 SEULEMENT
-        (le stock global n'est PAS re-crédité car le produit a déjà été donné physiquement).
-    Le quota normal est 2 par produit. Au-delà = surconsommation (affiché en orange/rouge).
-  -->
+  <!-- JEUNES -->
+  <div id="view-persons" class="view">
+    <div class="shead">
+      <h2>Les jeunes</h2>
+      <p>Suivi des fournitures données à chacun. Repère ceux qui surconsomment.</p>
+    </div>
+    <div class="stats">
+      <div class="stat"><div class="stat-n" id="p-total" style="color:var(--ink)">38</div><div class="stat-l">Jeunes</div></div>
+      <div class="stat"><div class="stat-n" id="p-given" style="color:var(--sage)">0</div><div class="stat-l">Produits donnés</div></div>
+      <div class="stat"><div class="stat-n" id="p-over" style="color:var(--amber)">0</div><div class="stat-l">Surconso.</div></div>
+    </div>
+    <div class="pgrid" id="pgrid"></div>
+    <div class="bbar"><button class="btn-bar" id="btn-refresh-persons">↻ Actualiser</button></div>
+  </div>
+
+  <!-- DÉTAIL JEUNE -->
   <div id="view-detail" class="view">
     <div class="back-row">
-      <button class="btn-sec" style="flex:0;padding:7px 11px" onclick="showView('persons')">← Retour</button>
-      <div class="ptitle" id="detail-name"></div>
+      <button class="btn-back" onclick="showView('persons')">← Jeunes</button>
+      <div class="detail-title" id="detail-name"></div>
     </div>
     <div class="stats">
-      <div class="stat"><div class="stat-n" id="d-total" style="color:var(--accent)">0</div><div class="stat-l">Total reçu</div></div>
-      <div class="stat"><div class="stat-n" id="d-quota">0/9</div><div class="stat-l">Quota atteint</div></div>
-      <div class="stat"><div class="stat-n" id="d-over" style="color:var(--danger)">0</div><div class="stat-l">En excès</div></div>
+      <div class="stat"><div class="stat-n" id="d-total" style="color:var(--sage)">0</div><div class="stat-l">Total reçu</div></div>
+      <div class="stat"><div class="stat-n" id="d-quota" style="color:var(--ink)">0/9</div><div class="stat-l">Quota atteint</div></div>
+      <div class="stat"><div class="stat-n" id="d-over" style="color:var(--amber)">0</div><div class="stat-l">En excès</div></div>
     </div>
-    <div class="lbl">Fournitures</div>
     <div class="cards" id="detail-cards"></div>
-    <div class="bbar">
-      <button class="btn-sec" id="btn-reset-p">↺ Remettre à 0</button>
-    </div>
+    <div class="bbar"><button class="btn-bar" id="btn-reset-p">↺ Tout remettre au quota</button></div>
+  </div>
+</div>
+
+<!-- QR MODAL -->
+<div class="modal" id="qr-modal">
+  <div class="modal-box">
+    <h3>QR code de connexion</h3>
+    <p class="mp">Scanne ce code avec un autre appareil pour t'y connecter automatiquement.</p>
+    <div id="qr-box"></div>
+    <div class="modal-warn">⚠ Contient ton token — ne le partage pas.</div>
+    <button class="btn btn-ghost" style="margin:0" onclick="document.getElementById('qr-modal').classList.remove('on')">Fermer</button>
   </div>
 </div>
 
 <div id="toast"></div>
 
 <script>
-// ════════════════════════════════════════════════════
-// CONFIGURATION
-// ════════════════════════════════════════════════════
-
-// Base Notion unique (contient TOUS les produits : partagés + individuels)
+// ══════════════ CONFIG ══════════════
 const DB_ID = '5fa77d9813c08353941c01d42d74d891';
-
-// Les 9 noms exacts des fournitures individuelles (tels qu'ils sont dans Notion)
 const INDIV = ['Brosse à dent','Crème de corps','Dentifrice','Déodorant','Gel douche','Lessive','Savon dur','Serviettes hygiéniques','Shampoing'];
-
-// Quota normal par produit par personne
 const QUOTA = 2;
-
-// Les 38 jeunes (stockés localement, leurs compteurs aussi)
 const NOMS = [
   "Lea Ida","TIBENG Destine Ngwe","DOUMOUBYA Seydou","ZIYAMA JOAO Graciana",
   "SIDIBE Sakoba","BALDE Houssainatou","KANTE Abdoul Said","CONTE Mohamed Mounir",
@@ -294,577 +329,301 @@ const NOMS = [
   "DJIMOU TOUOFO Hermar","AMRE Steven"
 ];
 
-// ════════════════════════════════════════════════════
-// ÉTAT
-// ════════════════════════════════════════════════════
+// ══════════════ STATE ══════════════
+let TOKEN='', shared=[], indivStock={}, jeunes=[], currentJeune=null;
 
-let TOKEN = '';
-
-// Produits partagés depuis Notion : [{id, name, dispo, total, lastEdit}]
-let shared = [];
-
-// Fournitures individuelles depuis Notion : {nom_produit → {id, dispo, total}}
-// Ex: {'Brosse à dent': {id:'xxx', dispo:60, total:76}}
-let indivStock = {};
-
-// Jeunes avec leurs compteurs (localStorage) : [{id, name, counts:{produit:nb}}]
-// counts = combien a été donné à cette personne pour chaque produit
-let jeunes = [];
-
-// Personne actuellement affichée dans le détail
-let currentJeune = null;
-
-// ════════════════════════════════════════════════════
-// PERSISTENCE LOCALE (jeunes + compteurs)
-// ════════════════════════════════════════════════════
-
-function loadJeunes() {
-  const raw = localStorage.getItem('bern_jeunes_v2');
-  if (raw) {
-    jeunes = JSON.parse(raw);
-    // S'assurer que tous les produits existent pour chaque jeune
-    jeunes.forEach(j => {
-      INDIV.forEach(p => { if (j.counts[p] === undefined) j.counts[p] = 0; });
-    });
-  } else {
-    // Premier lancement : crée les 38 jeunes avec compteurs à 0
-    // (0 = rien donné encore, pas 2 car les compteurs trackent CE QUI A ÉTÉ DONNÉ)
-    jeunes = NOMS.map((name, i) => ({
-      id: 'j' + i,
-      name,
-      counts: Object.fromEntries(INDIV.map(p => [p, 2]))
-    }));
+// ══════════════ PERSISTENCE ══════════════
+function loadJeunes(){
+  const raw=localStorage.getItem('bern_jeunes_v3');
+  if(raw){
+    jeunes=JSON.parse(raw);
+    jeunes.forEach(j=>INDIV.forEach(p=>{if(j.counts[p]===undefined)j.counts[p]=QUOTA;}));
+  }else{
+    // Chaque jeune démarre AU QUOTA (2 de chaque)
+    jeunes=NOMS.map((name,i)=>({id:'j'+i,name,counts:Object.fromEntries(INDIV.map(p=>[p,QUOTA]))}));
     saveJeunes();
   }
 }
+function saveJeunes(){localStorage.setItem('bern_jeunes_v3',JSON.stringify(jeunes));}
 
-function saveJeunes() {
-  localStorage.setItem('bern_jeunes_v2', JSON.stringify(jeunes));
-}
-
-// ════════════════════════════════════════════════════
-// API NOTION (via proxy /api/notion sur Vercel)
-// ════════════════════════════════════════════════════
-
-async function notion(endpoint, method = 'GET', body = null) {
-  const res = await fetch(`/api/notion?endpoint=${encodeURIComponent(endpoint)}`, {
-    method,
-    headers: {
-      'Authorization': `Bearer ${TOKEN}`,
-      'Notion-Version': '2022-06-28',
-      'Content-Type': 'application/json'
-    },
-    body: body ? JSON.stringify(body) : undefined
+// ══════════════ API ══════════════
+async function notion(endpoint,method='GET',body=null){
+  const res=await fetch(`/api/notion?endpoint=${encodeURIComponent(endpoint)}`,{
+    method,headers:{'Authorization':`Bearer ${TOKEN}`,'Notion-Version':'2022-06-28','Content-Type':'application/json'},
+    body:body?JSON.stringify(body):undefined
   });
-  const data = await res.json();
-  if (!res.ok) throw new Error(data.message || 'Erreur Notion');
+  const data=await res.json();
+  if(!res.ok)throw new Error(data.message||'Erreur Notion');
   return data;
 }
 
-// ════════════════════════════════════════════════════
-// CHARGEMENT DEPUIS NOTION
-// ════════════════════════════════════════════════════
-
-async function loadFromNotion() {
-  sync('loading', 'Chargement...');
-  try {
-    const data = await notion(`databases/${DB_ID}/query`, 'POST', {
-      sorts: [{ property: 'Nom', direction: 'ascending' }]
+// ══════════════ LOAD ══════════════
+async function loadFromNotion(){
+  sync('loading','Chargement');
+  try{
+    const data=await notion(`databases/${DB_ID}/query`,'POST',{sorts:[{property:'Nom',direction:'ascending'}]});
+    shared=[];indivStock={};
+    data.results.forEach(pg=>{
+      const pr=pg.properties;
+      const name=pr['Nom']?.title?.[0]?.plain_text||'?';
+      const dispo=pr['Quantité dispo']?.number??0;
+      const total=pr['Quantité']?.number??10;
+      const last=pr['Dernière utilisation']?.date?.start||null;
+      if(INDIV.includes(name))indivStock[name]={id:pg.id,dispo,total,last};
+      else shared.push({id:pg.id,name,dispo,total,last});
     });
-
-    shared = [];
-    indivStock = {};
-
-    data.results.forEach(page => {
-      const props = page.properties;
-      const name  = props['Nom']?.title?.[0]?.plain_text || '?';
-      const dispo = props['Quantité dispo']?.number ?? 0;
-      const total = props['Quantité']?.number ?? 10;
-      const last  = props['Dernière utilisation']?.date?.start || null;
-
-      if (INDIV.includes(name)) {
-        // C'est une fourniture individuelle
-        indivStock[name] = { id: page.id, dispo, total, last };
-      } else {
-        // C'est un produit partagé
-        shared.push({ id: page.id, name, dispo, total, last });
-      }
-    });
-
-    renderShared();
-    renderIndiv();
-    renderPersonsGrid();
-    if (currentJeune) renderDetail();
-    sync('ok', 'Synchronisé');
-  } catch (e) {
-    sync('error', 'Erreur');
-    toast('❌ ' + e.message, 'err');
-  }
+    renderShared();renderIndiv();renderPersons();
+    if(currentJeune)renderDetail();
+    sync('ok','À jour');
+  }catch(e){sync('error','Erreur');toast('Erreur : '+e.message,'err');}
 }
 
-// ════════════════════════════════════════════════════
-// HELPERS VISUELS
-// ════════════════════════════════════════════════════
+// ══════════════ HELPERS ══════════════
+function lvl(d,t){if(d<=0)return'danger';if(t>0&&d/t<=0.2)return'warn';if(d<=5)return'warn';return'ok';}
+function pill(l){return l==='ok'?'<span class="pill pill-ok">En stock</span>':l==='warn'?'<span class="pill pill-warn">Bas</span>':'<span class="pill pill-danger">Épuisé</span>';}
+function pct(d,t){return t>0?Math.max(0,Math.min(100,d/t*100)):0;}
+function col(l){return l==='ok'?'var(--sage)':l==='warn'?'var(--amber)':'var(--rust)';}
+function dt(d){return d?new Date(d).toLocaleDateString('fr-FR'):'jamais';}
+function today(){return new Date().toISOString().split('T')[0];}
+function prenom(n){return n.split(' ').slice(-1)[0];}
 
-function level(dispo, total) {
-  if (dispo <= 0) return 'danger';
-  if (total > 0 && dispo / total <= 0.2) return 'warn';
-  if (dispo <= 5) return 'warn';
-  return 'ok';
-}
-
-function tagHtml(l) {
-  if (l === 'ok')     return '<span class="tag tag-ok">✅ OK</span>';
-  if (l === 'warn')   return '<span class="tag tag-warn">🟠 Bas</span>';
-  return '<span class="tag tag-danger">🔴 URGENT</span>';
-}
-
-function color(l) {
-  return l === 'ok' ? 'var(--ok)' : l === 'warn' ? 'var(--warn)' : 'var(--danger)';
-}
-
-function pct(dispo, total) {
-  return total > 0 ? Math.max(0, Math.min(100, (dispo / total) * 100)) : 0;
-}
-
-function dateStr(d) {
-  return d ? new Date(d).toLocaleDateString('fr-FR') : 'jamais';
-}
-
-// ════════════════════════════════════════════════════
-// RENDER — STOCK PARTAGÉ
-// ════════════════════════════════════════════════════
-
-function renderShared() {
-  const el = document.getElementById('shared-cards');
-  if (!shared.length) {
-    el.innerHTML = '<p style="color:var(--muted);font-size:0.8rem;padding:16px 0">Aucun produit partagé trouvé.</p>';
-    return;
-  }
-
-  el.innerHTML = shared.map(p => {
-    const l  = level(p.dispo, p.total);
-    const pc = pct(p.dispo, p.total);
+// ══════════════ STOCK PARTAGÉ ══════════════
+function renderShared(){
+  const el=document.getElementById('shared-cards');
+  if(!shared.length){el.innerHTML='<p style="color:var(--muted);font-size:.82rem;padding:20px 0">Aucun produit partagé.</p>';return;}
+  el.innerHTML=shared.map(p=>{
+    const l=lvl(p.dispo,p.total);
     return `<div class="card ${l}">
       <div>
         <div class="card-name">${p.name}</div>
-        <div class="card-row">
-          <span class="card-num ${l}">${p.dispo}</span>
-          <span class="card-total">/ ${p.total}</span>
-          ${tagHtml(l)}
-        </div>
-        <div class="card-sub">Dernière utilisation : ${dateStr(p.last)}</div>
-        <div class="bar"><div class="bar-fill" style="width:${pc}%;background:${color(l)}"></div></div>
+        <div class="card-line"><span class="card-num ${l}">${p.dispo}</span><span class="card-den">/ ${p.total}</span>${pill(l)}</div>
+        <div class="card-sub">Dernier mouvement : ${dt(p.last)}</div>
+        <div class="bar"><div class="bar-fill" style="width:${pct(p.dispo,p.total)}%;background:${col(l)}"></div></div>
       </div>
-      <div class="btns">
-        <button class="b p" onclick="moveShared('${p.id}',1)" title="Ajouter 1 au stock">+</button>
-        <button class="b m" onclick="moveShared('${p.id}',-1)" ${p.dispo <= 0 ? 'disabled' : ''} title="Retirer 1 du stock">−</button>
+      <div class="btns-simple">
+        <button class="bsq plus" onclick="moveShared('${p.id}',1)">+</button>
+        <button class="bsq minus" onclick="moveShared('${p.id}',-1)" ${p.dispo<=0?'disabled':''}>−</button>
       </div>
     </div>`;
   }).join('');
-
-  // Alerte
-  const crit = shared.filter(p => level(p.dispo, p.total) !== 'ok');
-  const b = document.getElementById('banner-shared');
-  if (crit.length) {
-    document.getElementById('banner-shared-list').innerHTML = crit
-      .map(p => `${p.dispo <= 0 ? '🔴' : '🟠'} <strong>${p.name}</strong> — ${p.dispo}/${p.total} restants`)
-      .join('<br>');
-    b.classList.add('on');
-  } else b.classList.remove('on');
+  const crit=shared.filter(p=>lvl(p.dispo,p.total)!=='ok');
+  const b=document.getElementById('banner-shared');
+  if(crit.length){document.getElementById('banner-shared-list').innerHTML=crit.map(p=>`<strong>${p.name}</strong> — ${p.dispo}/${p.total}`).join('<br>');b.classList.add('on');}
+  else b.classList.remove('on');
+}
+async function moveShared(id,d){
+  const p=shared.find(x=>x.id===id);if(!p)return;
+  p.dispo=Math.max(0,p.dispo+d);renderShared();sync('loading','Sync');
+  try{
+    await notion(`pages/${id}`,'PATCH',{properties:{'Quantité dispo':{number:p.dispo},'Dernière utilisation':{date:{start:today()}}}});
+    sync('ok','À jour');
+    const l=lvl(p.dispo,p.total);
+    if(l==='danger')toast(`${p.name} — épuisé`,'err');else if(l==='warn')toast(`${p.name} — stock bas`,'warn');else toast(`${d>0?'+1':'−1'} ${p.name}`,'ok');
+  }catch(e){p.dispo-=d;renderShared();sync('error','Erreur');toast('Erreur : '+e.message,'err');}
 }
 
-async function moveShared(pageId, delta) {
-  const p = shared.find(x => x.id === pageId);
-  if (!p) return;
-  const newQty = Math.max(0, p.dispo + delta);
-  p.dispo = newQty;
-  renderShared();
-  sync('loading', 'Sync...');
-  try {
-    await notion(`pages/${pageId}`, 'PATCH', {
-      properties: {
-        'Quantité dispo': { number: newQty },
-        'Dernière utilisation': { date: { start: today() } }
-      }
-    });
-    sync('ok', 'Synchronisé');
-    const l = level(newQty, p.total);
-    if (l === 'danger') toast(`🔴 ${p.name} — Rupture !`, 'err');
-    else if (l === 'warn') toast(`🟠 ${p.name} — Stock bas`, 'warn');
-    else toast(`${delta > 0 ? '📦 +1' : '✓ −1'} ${p.name}`, 'ok');
-  } catch (e) {
-    p.dispo -= delta;
-    renderShared();
-    sync('error', 'Erreur');
-    toast('❌ ' + e.message, 'err');
-  }
-}
-
-// ════════════════════════════════════════════════════
-// RENDER — STOCK INDIVIDUEL (vue globale par produit)
-// ════════════════════════════════════════════════════
-
-function renderIndiv() {
-  const el = document.getElementById('indiv-cards');
-
-  // Calcule combien a été donné au total pour chaque produit
-  const totalDonne = {};
-  INDIV.forEach(p => {
-    totalDonne[p] = jeunes.reduce((s, j) => s + (j.counts[p] || 0), 0);
-  });
-
-  const totalStock  = INDIV.reduce((s, p) => s + (indivStock[p]?.dispo || 0), 0);
-  const totalGiven  = Object.values(totalDonne).reduce((a, b) => a + b, 0);
-  const nbAlert     = INDIV.filter(p => indivStock[p] && level(indivStock[p].dispo, indivStock[p].total) !== 'ok').length;
-
-  document.getElementById('s-total').textContent   = totalStock;
-  document.getElementById('s-given').textContent   = totalGiven;
-  document.getElementById('s-alert').textContent   = nbAlert;
-
-  if (!Object.keys(indivStock).length) {
-    el.innerHTML = '<p style="color:var(--muted);font-size:0.8rem;padding:16px 0">Fournitures non trouvées dans Notion.<br>Vérifiez que les noms correspondent exactement.</p>';
-    return;
-  }
-
-  el.innerHTML = INDIV.map(pname => {
-    const stock = indivStock[pname];
-    if (!stock) return `<div class="card danger"><div><div class="card-name">${pname}</div><div class="card-sub" style="color:var(--danger)">⚠️ Non trouvé dans Notion</div></div></div>`;
-    const l  = level(stock.dispo, stock.total);
-    const pc = pct(stock.dispo, stock.total);
-    const done = totalDonne[pname];
+// ══════════════ FOURNITURES ══════════════
+function renderIndiv(){
+  const el=document.getElementById('indiv-cards');
+  const donne={};INDIV.forEach(p=>{donne[p]=jeunes.reduce((s,j)=>s+(j.counts[p]||0),0);});
+  const totStock=INDIV.reduce((s,p)=>s+(indivStock[p]?.dispo||0),0);
+  const totGiven=Object.values(donne).reduce((a,b)=>a+b,0);
+  const nAlert=INDIV.filter(p=>indivStock[p]&&lvl(indivStock[p].dispo,indivStock[p].total)!=='ok').length;
+  document.getElementById('s-total').textContent=totStock;
+  document.getElementById('s-given').textContent=totGiven;
+  document.getElementById('s-alert').textContent=nAlert;
+  if(!Object.keys(indivStock).length){el.innerHTML='<p style="color:var(--muted);font-size:.82rem;padding:20px 0">Fournitures introuvables dans Notion.</p>';return;}
+  el.innerHTML=INDIV.map(pn=>{
+    const s=indivStock[pn];
+    if(!s)return `<div class="card danger"><div><div class="card-name">${pn}</div><div class="card-sub" style="color:var(--rust)">Introuvable dans Notion</div></div></div>`;
+    const l=lvl(s.dispo,s.total);
     return `<div class="card ${l}">
       <div>
-        <div class="card-name">${pname}</div>
-        <div class="card-row">
-          <span class="card-num ${l}">${stock.dispo}</span>
-          <span class="card-total">/ ${stock.total} en stock</span>
-          ${tagHtml(l)}
-        </div>
-        <div class="card-sub">Distribués : <strong>${done}</strong> — Dernière dist. : ${dateStr(stock.last)}</div>
-        <div class="bar"><div class="bar-fill" style="width:${pc}%;background:${color(l)}"></div></div>
+        <div class="card-name">${pn}</div>
+        <div class="card-line"><span class="card-num ${l}">${s.dispo}</span><span class="card-den">/ ${s.total}</span>${pill(l)}</div>
+        <div class="card-sub">Distribués : <strong>${donne[pn]}</strong> · Dernière dist. : ${dt(s.last)}</div>
+        <div class="bar"><div class="bar-fill" style="width:${pct(s.dispo,s.total)}%;background:${col(l)}"></div></div>
       </div>
-      <div class="btns">
-        <button class="b p" onclick="moveIndiv('${pname}',1)" title="Ajouter 1 au stock global">+</button>
-        <button class="b m" onclick="moveIndiv('${pname}',-1)" ${stock.dispo <= 0 ? 'disabled' : ''} title="Retirer 1 du stock global">−</button>
+      <div class="btns-simple">
+        <button class="bsq plus" onclick="moveIndiv('${pn}',1)">+</button>
+        <button class="bsq minus" onclick="moveIndiv('${pn}',-1)" ${s.dispo<=0?'disabled':''}>−</button>
       </div>
     </div>`;
   }).join('');
-
-  // Alerte
-  const crit = INDIV.filter(p => indivStock[p] && level(indivStock[p].dispo, indivStock[p].total) !== 'ok');
-  const b = document.getElementById('banner-indiv');
-  if (crit.length) {
-    document.getElementById('banner-indiv-list').innerHTML = crit
-      .map(p => `${indivStock[p].dispo <= 0 ? '🔴' : '🟠'} <strong>${p}</strong> — ${indivStock[p].dispo}/${indivStock[p].total}`)
-      .join('<br>');
-    b.classList.add('on');
-  } else b.classList.remove('on');
+  const crit=INDIV.filter(p=>indivStock[p]&&lvl(indivStock[p].dispo,indivStock[p].total)!=='ok');
+  const b=document.getElementById('banner-indiv');
+  if(crit.length){document.getElementById('banner-indiv-list').innerHTML=crit.map(p=>`<strong>${p}</strong> — ${indivStock[p].dispo}/${indivStock[p].total}`).join('<br>');b.classList.add('on');}
+  else b.classList.remove('on');
+}
+async function moveIndiv(pn,d){
+  const s=indivStock[pn];if(!s)return;
+  s.dispo=Math.max(0,s.dispo+d);renderIndiv();sync('loading','Sync');
+  try{
+    await notion(`pages/${s.id}`,'PATCH',{properties:{'Quantité dispo':{number:s.dispo},'Dernière utilisation':{date:{start:today()}}}});
+    sync('ok','À jour');toast(`${d>0?'+1':'−1'} ${pn}`,'ok');
+  }catch(e){s.dispo-=d;renderIndiv();sync('error','Erreur');toast('Erreur : '+e.message,'err');}
 }
 
-async function moveIndiv(pname, delta) {
-  const stock = indivStock[pname];
-  if (!stock) return;
-  const newQty = Math.max(0, stock.dispo + delta);
-  stock.dispo = newQty;
-  renderIndiv();
-  sync('loading', 'Sync...');
-  try {
-    await notion(`pages/${stock.id}`, 'PATCH', {
-      properties: {
-        'Quantité dispo': { number: newQty },
-        'Dernière utilisation': { date: { start: today() } }
-      }
-    });
-    sync('ok', 'Synchronisé');
-    toast(`${delta > 0 ? '📦 +1' : '✓ −1'} ${pname} (stock global)`, 'ok');
-  } catch (e) {
-    stock.dispo -= delta;
-    renderIndiv();
-    sync('error', 'Erreur');
-    toast('❌ ' + e.message, 'err');
-  }
-}
-
-// ════════════════════════════════════════════════════
-// RENDER — GRILLE PERSONNES
-// ════════════════════════════════════════════════════
-
-function renderPersonsGrid() {
-  const totalGiven = jeunes.reduce((s, j) => s + Object.values(j.counts).reduce((a, b) => a + b, 0), 0);
-  // Surconsommateurs = au moins 1 produit dépassant le quota × 2
-  const overConsumers = jeunes.filter(j => INDIV.some(p => j.counts[p] > QUOTA * 2)).length;
-
-  document.getElementById('p-total').textContent = jeunes.length;
-  document.getElementById('p-given').textContent = totalGiven;
-  document.getElementById('p-over').textContent  = overConsumers;
-
-  document.getElementById('pgrid').innerHTML = jeunes.map(j => {
-    const total = Object.values(j.counts).reduce((a, b) => a + b, 0);
-    const over  = INDIV.some(p => j.counts[p] > QUOTA * 2);
-    const done  = INDIV.every(p => j.counts[p] >= QUOTA);
-    return `<div class="pchip ${done ? 'done' : ''}" onclick="openDetail('${j.id}')"
-      style="${over ? 'border-color:var(--warn)' : ''}">
-      <div style="min-width:0">
-        <div class="pname">${j.name}</div>
-        <div class="pcount">${total} produits${over ? ' ⚠️' : ''}</div>
+// ══════════════ JEUNES GRID ══════════════
+function renderPersons(){
+  const totGiven=jeunes.reduce((s,j)=>s+Object.values(j.counts).reduce((a,b)=>a+b,0),0);
+  const over=jeunes.filter(j=>INDIV.some(p=>j.counts[p]>QUOTA*2)).length;
+  document.getElementById('p-total').textContent=jeunes.length;
+  document.getElementById('p-given').textContent=totGiven;
+  document.getElementById('p-over').textContent=over;
+  document.getElementById('pgrid').innerHTML=jeunes.map(j=>{
+    const tot=Object.values(j.counts).reduce((a,b)=>a+b,0);
+    const isOver=INDIV.some(p=>j.counts[p]>QUOTA*2);
+    const full=INDIV.every(p=>j.counts[p]>=QUOTA);
+    return `<div class="pchip ${isOver?'over':full?'done':''}" onclick="openDetail('${j.id}')">
+      <div class="pchip-top">
+        <div class="pchip-name">${j.name}</div>
+        <span class="pchip-badge">${isOver?'⚠':full?'✓':''}</span>
       </div>
-      <span style="font-size:0.85rem">${done ? '✅' : '→'}</span>
+      <div class="pchip-meta">${tot} produits reçus</div>
     </div>`;
   }).join('');
 }
 
-// ════════════════════════════════════════════════════
-// DÉTAIL PERSONNE
-// ════════════════════════════════════════════════════
-
-function openDetail(jid) {
-  currentJeune = jid;
-  const j = jeunes.find(x => x.id === jid);
-  document.getElementById('detail-name').textContent = '👤 ' + j.name;
-  renderDetail();
-  showView('detail');
+// ══════════════ DÉTAIL JEUNE ══════════════
+function openDetail(id){
+  currentJeune=id;
+  document.getElementById('detail-name').textContent=jeunes.find(x=>x.id===id).name;
+  renderDetail();showView('detail');
 }
-
-function renderDetail() {
-  const j = jeunes.find(x => x.id === currentJeune);
-  if (!j) return;
-
-  const totalRecu  = Object.values(j.counts).reduce((a, b) => a + b, 0);
-  const quotaOk    = INDIV.filter(p => j.counts[p] >= QUOTA).length;
-  const enExces    = INDIV.filter(p => j.counts[p] > QUOTA * 2).length;
-
-  document.getElementById('d-total').textContent = totalRecu;
-  document.getElementById('d-quota').textContent = `${quotaOk}/${INDIV.length}`;
-  document.getElementById('d-over').textContent  = enExces;
-
-  document.getElementById('detail-cards').innerHTML = INDIV.map(pname => {
-    const qty   = j.counts[pname] || 0;
-    const stock = indivStock[pname];
-    const dispo = stock ? stock.dispo : 0;
-
-    // Niveau de consommation de cette personne pour ce produit
-    let consLevel = 'ok';
-    if (qty > QUOTA * 2) consLevel = 'danger';       // très élevé
-    else if (qty > QUOTA) consLevel = 'warn';         // dépasse le quota normal
-
-    const stockOk = dispo > 0;
-
-    return `<div class="card ${consLevel === 'ok' ? (qty >= QUOTA ? '' : '') : consLevel}"
-      style="${qty >= QUOTA ? 'border-color:#0d2e1a' : ''}; ${consLevel !== 'ok' ? '' : ''}">
+function renderDetail(){
+  const j=jeunes.find(x=>x.id===currentJeune);if(!j)return;
+  const tot=Object.values(j.counts).reduce((a,b)=>a+b,0);
+  const quotaOk=INDIV.filter(p=>j.counts[p]>=QUOTA).length;
+  const exces=INDIV.filter(p=>j.counts[p]>QUOTA*2).length;
+  document.getElementById('d-total').textContent=tot;
+  document.getElementById('d-quota').textContent=`${quotaOk}/${INDIV.length}`;
+  document.getElementById('d-over').textContent=exces;
+  document.getElementById('detail-cards').innerHTML=INDIV.map(pn=>{
+    const qty=j.counts[pn]||0;
+    const s=indivStock[pn];const dispo=s?s.dispo:0;
+    let cl='ok';if(qty>QUOTA*2)cl='danger';else if(qty>QUOTA)cl='warn';
+    const stockOk=dispo>0;
+    let mark='';
+    if(qty>QUOTA*2)mark='<span style="font-size:.62rem;color:var(--rust);font-weight:600">excès</span>';
+    else if(qty>QUOTA)mark='<span style="font-size:.62rem;color:var(--amber);font-weight:600">élevé</span>';
+    else if(qty>=QUOTA)mark='<span style="font-size:.62rem;color:var(--sage);font-weight:600">quota ✓</span>';
+    return `<div class="card ${cl}">
       <div>
-        <div class="card-name">
-          ${pname}
-          ${qty >= QUOTA ? '<span style="font-size:0.65rem;color:var(--ok);margin-left:5px">✓ quota</span>' : ''}
-          ${qty > QUOTA * 2 ? '<span style="font-size:0.65rem;color:var(--danger);margin-left:5px">⚠️ excès</span>' : qty > QUOTA ? '<span style="font-size:0.65rem;color:var(--warn);margin-left:5px">↑ élevé</span>' : ''}
-        </div>
-        <div class="card-row">
-          <span class="card-num ${consLevel}">${qty}</span>
-          <span class="card-total" style="margin-left:4px">donné${qty > 1 ? 's' : ''}</span>
-          <span style="font-size:0.62rem;color:var(--muted)">(quota: ${QUOTA})</span>
-        </div>
-        <div class="card-sub">Stock disponible : <strong style="color:${dispo <= 0 ? 'var(--danger)' : 'var(--text)'}">${dispo}</strong></div>
+        <div class="card-name">${pn} ${mark}</div>
+        <div class="card-sub" style="margin-top:5px">Stock disponible : <strong style="color:${dispo<=0?'var(--rust)':'var(--ink)'}">${dispo}</strong> · quota normal : ${QUOTA}</div>
       </div>
-      <div class="btns">
-        <button class="b p" onclick="giveOne('${j.id}','${pname}')"
-          ${!stockOk ? 'disabled title="Stock épuisé"' : 'title="Donner 1 — stock −1"'}>+</button>
-        <button class="b m" onclick="undoOne('${j.id}','${pname}')"
-          ${qty <= 0 ? 'disabled' : ''} title="Annuler saisie (compteur only)">−</button>
-        <button class="b" onclick="resetOne('${j.id}','${pname}')"
-          style="font-size:0.7rem;color:var(--muted);border-color:var(--border)" title="Remettre ce compteur à 0">↺</button>
+      <div class="ctl">
+        <div class="stepper">
+          <button class="step plus" onclick="giveOne('${j.id}','${pn}')" ${!stockOk?'disabled title="Stock épuisé"':'title="Donner 1"'}>+</button>
+          <div class="step-val" id="val-${btoa(pn).replace(/=/g,'')}" onclick="editCount('${j.id}','${pn}',this)" title="Clique pour modifier">${qty}</div>
+          <button class="step minus" onclick="undoOne('${j.id}','${pn}')" ${qty<=0?'disabled':''} title="Annuler une saisie">−</button>
+        </div>
+        <button class="mini-reset" onclick="resetOne('${j.id}','${pn}')" title="Remettre au quota">↺ quota</button>
       </div>
     </div>`;
   }).join('');
 }
 
-// ════════════════════════════════════════════════════
-// ACTIONS PERSONNE
-// ════════════════════════════════════════════════════
-
-/**
- * Donner 1 produit à un jeune :
- * - Compteur de la personne +1 (localStorage)
- * - Stock global Notion −1
- */
-async function giveOne(jid, pname) {
-  const j     = jeunes.find(x => x.id === jid);
-  const stock = indivStock[pname];
-  if (!j || !stock) return;
-  if (stock.dispo <= 0) { toast('🔴 Stock épuisé pour ' + pname, 'err'); return; }
-
-  // Mise à jour optimiste
-  j.counts[pname] = (j.counts[pname] || 0) + 1;
-  stock.dispo     = Math.max(0, stock.dispo - 1);
-  saveJeunes();
-  renderDetail();
-  renderPersonsGrid();
-  renderIndiv();
-
-  sync('loading', 'Sync...');
-  try {
-    await notion(`pages/${stock.id}`, 'PATCH', {
-      properties: {
-        'Quantité dispo': { number: stock.dispo },
-        'Dernière utilisation': { date: { start: today() } }
-      }
-    });
-    sync('ok', 'Synchronisé');
-    const prenom = j.name.split(' ').slice(-1)[0];
-    toast(`📦 ${pname} → ${prenom}`, 'ok');
-  } catch (e) {
-    // Rollback
-    j.counts[pname]--;
-    stock.dispo++;
-    saveJeunes();
-    renderDetail();
-    renderIndiv();
-    sync('error', 'Erreur');
-    toast('❌ ' + e.message, 'err');
-  }
+// ══════════════ ACTIONS JEUNE ══════════════
+// + : compteur +1, stock global −1
+async function giveOne(id,pn){
+  const j=jeunes.find(x=>x.id===id);const s=indivStock[pn];
+  if(!j||!s)return;
+  if(s.dispo<=0){toast('Stock épuisé — '+pn,'err');return;}
+  j.counts[pn]=(j.counts[pn]||0)+1;s.dispo=Math.max(0,s.dispo-1);
+  saveJeunes();renderDetail();renderPersons();renderIndiv();
+  sync('loading','Sync');
+  try{
+    await notion(`pages/${s.id}`,'PATCH',{properties:{'Quantité dispo':{number:s.dispo},'Dernière utilisation':{date:{start:today()}}}});
+    sync('ok','À jour');toast(`${pn} → ${prenom(j.name)}`,'ok');
+  }catch(e){j.counts[pn]--;s.dispo++;saveJeunes();renderDetail();renderIndiv();sync('error','Erreur');toast('Erreur : '+e.message,'err');}
+}
+// − : compteur −1 seulement (annule saisie, stock inchangé)
+function undoOne(id,pn){
+  const j=jeunes.find(x=>x.id===id);if(!j||(j.counts[pn]||0)<=0)return;
+  j.counts[pn]--;saveJeunes();renderDetail();renderPersons();renderIndiv();
+  toast(`Annulé — ${pn}`,'ok');
+}
+// Édition directe du compteur au clic
+function editCount(id,pn,el){
+  const j=jeunes.find(x=>x.id===id);if(!j)return;
+  const cur=j.counts[pn]||0;
+  const inp=document.createElement('input');
+  inp.type='number';inp.className='step-input';inp.value=cur;inp.min=0;
+  el.replaceWith(inp);inp.focus();inp.select();
+  const commit=()=>{
+    const v=Math.max(0,parseInt(inp.value)||0);
+    j.counts[pn]=v;saveJeunes();renderDetail();renderPersons();renderIndiv();
+    toast(`${pn} : ${v} pour ${prenom(j.name)}`,'ok');
+  };
+  inp.addEventListener('blur',commit);
+  inp.addEventListener('keydown',e=>{if(e.key==='Enter')inp.blur();if(e.key==='Escape')renderDetail();});
+}
+// ↺ : remet ce compteur au quota (2)
+function resetOne(id,pn){
+  const j=jeunes.find(x=>x.id===id);if(!j)return;
+  j.counts[pn]=QUOTA;saveJeunes();renderDetail();renderPersons();renderIndiv();
+  toast(`${pn} remis au quota pour ${prenom(j.name)}`,'ok');
+}
+// Reset complet de la personne
+function resetPersonne(){
+  const j=jeunes.find(x=>x.id===currentJeune);if(!j)return;
+  if(!confirm(`Remettre tous les compteurs de ${j.name} au quota (${QUOTA}) ?`))return;
+  INDIV.forEach(p=>{j.counts[p]=QUOTA;});saveJeunes();renderDetail();renderPersons();renderIndiv();
+  toast('Compteurs remis au quota','ok');
 }
 
-/**
- * Remettre le compteur d'un seul produit à 0 pour une personne
- */
-function resetOne(jid, pname) {
-  const j = jeunes.find(x => x.id === jid);
-  if (!j) return;
-  if (!confirm(`Remettre le compteur "${pname}" de ${j.name} à 0 ?`)) return;
-  j.counts[pname] = 0;
-  saveJeunes();
-  renderDetail();
-  renderPersonsGrid();
-  renderIndiv();
-  toast(`↺ ${pname} remis à 0 pour ${j.name.split(' ').slice(-1)[0]}`, 'ok');
+// ══════════════ NAV ══════════════
+function showView(id){
+  document.querySelectorAll('.view').forEach(v=>v.classList.remove('on'));
+  document.getElementById('view-'+id).classList.add('on');
+  document.querySelectorAll('.tab').forEach(t=>t.classList.toggle('on',t.dataset.v===id));
+  window.scrollTo(0,0);
 }
 
-/**
- * Annuler une saisie (erreur) :
- * - Compteur de la personne −1 uniquement (localStorage)
- * - Le stock Notion ne change PAS
- */
-function undoOne(jid, pname) {
-  const j = jeunes.find(x => x.id === jid);
-  if (!j || (j.counts[pname] || 0) <= 0) return;
-  j.counts[pname]--;
-  saveJeunes();
-  renderDetail();
-  renderPersonsGrid();
-  renderIndiv();
-  toast(`↩ Annulé — ${pname}`, 'ok');
-}
-
-// ════════════════════════════════════════════════════
-// RESET PERSONNE
-// ════════════════════════════════════════════════════
-
-function resetPersonne() {
-  const j = jeunes.find(x => x.id === currentJeune);
-  if (!j || !confirm(`Remettre tous les compteurs de ${j.name} à 0 ?\n(Le stock global ne sera pas affecté.)`)) return;
-  INDIV.forEach(p => { j.counts[p] = 0; });
-  saveJeunes();
-  renderDetail();
-  renderPersonsGrid();
-  renderIndiv();
-  toast('↺ Compteurs remis à 0', 'ok');
-}
-
-// ════════════════════════════════════════════════════
-// NAVIGATION
-// ════════════════════════════════════════════════════
-
-function showView(id) {
-  document.querySelectorAll('.view').forEach(v => v.classList.remove('on'));
-  document.getElementById('view-' + id).classList.add('on');
-  document.querySelectorAll('.tab').forEach(t => t.classList.toggle('on', t.dataset.v === id));
-}
-
-// ════════════════════════════════════════════════════
-// UTILS
-// ════════════════════════════════════════════════════
-
-function today() { return new Date().toISOString().split('T')[0]; }
-
-function sync(state, label) {
-  document.getElementById('dot').className = 'dot ' + state;
-  document.getElementById('sync-lbl').textContent = label;
-}
-
+// ══════════════ UTILS ══════════════
+function sync(s,l){document.getElementById('dot').className='dot '+s;document.getElementById('sync-lbl').textContent=l;}
 let _tt;
-function toast(msg, type = '') {
-  const t = document.getElementById('toast');
-  t.textContent = msg;
-  t.className   = 'on ' + type;
-  clearTimeout(_tt);
-  _tt = setTimeout(() => { t.className = ''; }, 3000);
+function toast(m,t=''){const e=document.getElementById('toast');e.textContent=m;e.className='on '+t;clearTimeout(_tt);_tt=setTimeout(()=>e.className='',3000);}
+
+// ══════════════ CONNEXION ══════════════
+async function connect(){
+  const t=document.getElementById('token-input').value.trim();if(!t)return;
+  TOKEN=t;const b=document.getElementById('btn-conn');b.disabled=true;b.textContent='Connexion…';
+  document.getElementById('err').style.display='none';
+  try{await notion(`databases/${DB_ID}/query`,'POST',{page_size:1});localStorage.setItem('bern_token',t);startApp();}
+  catch(e){TOKEN='';b.disabled=false;b.textContent='Se connecter';document.getElementById('err').style.display='block';}
+}
+function startApp(){
+  document.getElementById('setup').style.display='none';
+  document.getElementById('app').style.display='block';
+  loadJeunes();loadFromNotion();
 }
 
-// ════════════════════════════════════════════════════
-// CONNEXION & INIT
-// ════════════════════════════════════════════════════
+// ══════════════ INIT ══════════════
+window.addEventListener('DOMContentLoaded',()=>{
+  const saved=localStorage.getItem('bern_token');
+  if(saved){TOKEN=saved;startApp();}
+  document.getElementById('btn-conn').addEventListener('click',connect);
+  document.getElementById('token-input').addEventListener('keydown',e=>{if(e.key==='Enter')connect();});
+  document.querySelectorAll('.tab').forEach(t=>t.addEventListener('click',()=>showView(t.dataset.v)));
+  document.getElementById('btn-refresh-shared').addEventListener('click',loadFromNotion);
+  document.getElementById('btn-refresh-indiv').addEventListener('click',loadFromNotion);
+  document.getElementById('btn-refresh-persons').addEventListener('click',()=>{loadJeunes();renderPersons();});
+  document.getElementById('btn-reset-p').addEventListener('click',resetPersonne);
 
-async function connect() {
-  const t = document.getElementById('token-input').value.trim();
-  if (!t) return;
-  TOKEN = t;
-  const btn = document.getElementById('btn-conn');
-  btn.disabled = true;
-  btn.textContent = 'Connexion...';
-  document.getElementById('err').style.display = 'none';
-  try {
-    await notion(`databases/${DB_ID}/query`, 'POST', { page_size: 1 });
-    localStorage.setItem('bern_token', t);
-    startApp();
-  } catch (e) {
-    TOKEN = '';
-    btn.disabled = false;
-    btn.textContent = 'Connecter →';
-    document.getElementById('err').style.display = 'block';
-  }
-}
-
-function startApp() {
-  document.getElementById('setup').style.display = 'none';
-  document.getElementById('app').style.display   = 'block';
-  loadJeunes();
-  loadFromNotion();
-}
-
-window.addEventListener('DOMContentLoaded', () => {
-  const saved = localStorage.getItem('bern_token');
-  if (saved) { TOKEN = saved; startApp(); }
-
-  document.getElementById('btn-conn').addEventListener('click', connect);
-  document.getElementById('token-input').addEventListener('keydown', e => { if (e.key === 'Enter') connect(); });
-
-  document.querySelectorAll('.tab').forEach(t => t.addEventListener('click', () => showView(t.dataset.v)));
-
-  document.getElementById('btn-refresh-shared').addEventListener('click',   loadFromNotion);
-  document.getElementById('btn-refresh-indiv').addEventListener('click',    loadFromNotion);
-  document.getElementById('btn-refresh-persons').addEventListener('click',  () => { loadJeunes(); renderPersonsGrid(); });
-  document.getElementById('btn-reset-p').addEventListener('click', resetPersonne);
-
-  // QR code : encode l'URL avec le token en paramètre
-  document.getElementById('btn-gen-qr').addEventListener('click', () => {
-    const t = document.getElementById('token-input').value.trim() || localStorage.getItem('bern_token');
-    if (!t) { toast('Entre ton token d\'abord', 'err'); return; }
-    const box = document.getElementById('qr-box');
-    box.innerHTML = '';
-    const url = window.location.origin + window.location.pathname + '?tok=' + encodeURIComponent(t);
-    new QRCode(box, { text: url, width: 200, height: 200, colorDark:'#000', colorLight:'#fff' });
-    document.getElementById('qr-modal').style.display = 'flex';
+  document.getElementById('btn-gen-qr').addEventListener('click',()=>{
+    const t=document.getElementById('token-input').value.trim()||localStorage.getItem('bern_token');
+    if(!t){toast('Entre ton token d\\'abord','err');return;}
+    const box=document.getElementById('qr-box');box.innerHTML='';
+    const url=window.location.origin+window.location.pathname+'?tok='+encodeURIComponent(t);
+    new QRCode(box,{text:url,width:200,height:200,colorDark:'#14201c',colorLight:'#fffefb'});
+    document.getElementById('qr-modal').classList.add('on');
   });
 
-  // Auto-connexion via paramètre URL (?tok=...)
-  const urlParams = new URLSearchParams(window.location.search);
-  const tokFromUrl = urlParams.get('tok');
-  if (tokFromUrl) {
-    TOKEN = tokFromUrl;
-    localStorage.setItem('bern_token', tokFromUrl);
-    // Nettoie l'URL pour ne pas laisser le token visible
-    window.history.replaceState({}, '', window.location.pathname);
-    startApp();
-  }
+  const tok=new URLSearchParams(window.location.search).get('tok');
+  if(tok){TOKEN=tok;localStorage.setItem('bern_token',tok);window.history.replaceState({},'',window.location.pathname);startApp();}
 });
 </script>
 </body>
