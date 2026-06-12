@@ -289,7 +289,7 @@
       <div class="detail-title" id="detail-name"></div>
     </div>
     <div class="stats">
-      <div class="stat"><div class="stat-n" id="d-total" style="color:var(--sage)">0</div><div class="stat-l">Total reçu</div></div>
+      <div class="stat"><div class="stat-n" id="d-total" style="color:var(--sage);cursor:pointer" title="Clique pour modifier" onclick="editTotal(this)">0</div><div class="stat-l">Total reçu</div></div>
       <div class="stat"><div class="stat-n" id="d-quota" style="color:var(--ink)">0/9</div><div class="stat-l">Quota atteint</div></div>
       <div class="stat"><div class="stat-n" id="d-over" style="color:var(--amber)">0</div><div class="stat-l">En excès</div></div>
     </div>
@@ -337,10 +337,10 @@ function loadJeunes(){
   const raw=localStorage.getItem('bern_jeunes_v3');
   if(raw){
     jeunes=JSON.parse(raw);
-    jeunes.forEach(j=>INDIV.forEach(p=>{if(j.counts[p]===undefined)j.counts[p]=QUOTA;}));
+    jeunes.forEach(j=>{INDIV.forEach(p=>{if(j.counts[p]===undefined)j.counts[p]=QUOTA;});if(j.totalRecu===undefined)j.totalRecu=0;});
   }else{
     // Chaque jeune démarre AU QUOTA (2 de chaque)
-    jeunes=NOMS.map((name,i)=>({id:'j'+i,name,counts:Object.fromEntries(INDIV.map(p=>[p,QUOTA]))}));
+    jeunes=NOMS.map((name,i)=>({id:'j'+i,name,counts:Object.fromEntries(INDIV.map(p=>[p,QUOTA])),totalRecu:0}));
     saveJeunes();
   }
 }
@@ -466,13 +466,13 @@ async function moveIndiv(pn,d){
 
 // ══════════════ JEUNES GRID ══════════════
 function renderPersons(){
-  const totGiven=jeunes.reduce((s,j)=>s+Object.values(j.counts).reduce((a,b)=>a+b,0),0);
+  const totGiven=jeunes.reduce((s,j)=>s+(j.totalRecu||0),0);
   const over=jeunes.filter(j=>INDIV.some(p=>j.counts[p]>QUOTA*2)).length;
   document.getElementById('p-total').textContent=jeunes.length;
   document.getElementById('p-given').textContent=totGiven;
   document.getElementById('p-over').textContent=over;
   document.getElementById('pgrid').innerHTML=jeunes.map(j=>{
-    const tot=Object.values(j.counts).reduce((a,b)=>a+b,0);
+    const tot=j.totalRecu||0;
     const isOver=INDIV.some(p=>j.counts[p]>QUOTA*2);
     const full=INDIV.every(p=>j.counts[p]>=QUOTA);
     return `<div class="pchip ${isOver?'over':full?'done':''}" onclick="openDetail('${j.id}')">
@@ -493,7 +493,7 @@ function openDetail(id){
 }
 function renderDetail(){
   const j=jeunes.find(x=>x.id===currentJeune);if(!j)return;
-  const tot=Object.values(j.counts).reduce((a,b)=>a+b,0);
+  const tot=j.totalRecu||0;
   const quotaOk=INDIV.filter(p=>j.counts[p]>=QUOTA).length;
   const exces=INDIV.filter(p=>j.counts[p]>QUOTA*2).length;
   document.getElementById('d-total').textContent=tot;
@@ -531,13 +531,15 @@ async function giveOne(id,pn){
   const j=jeunes.find(x=>x.id===id);const s=indivStock[pn];
   if(!j||!s)return;
   if(s.dispo<=0){toast('Stock épuisé — '+pn,'err');return;}
-  j.counts[pn]=(j.counts[pn]||0)+1;s.dispo=Math.max(0,s.dispo-1);
+  j.counts[pn]=(j.counts[pn]||0)+1;
+  j.totalRecu=(j.totalRecu||0)+1;
+  s.dispo=Math.max(0,s.dispo-1);
   saveJeunes();renderDetail();renderPersons();renderIndiv();
   sync('loading','Sync');
   try{
     await notion(`pages/${s.id}`,'PATCH',{properties:{'Quantité dispo':{number:s.dispo},'Dernière utilisation':{date:{start:today()}}}});
     sync('ok','À jour');toast(`${pn} → ${prenom(j.name)}`,'ok');
-  }catch(e){j.counts[pn]--;s.dispo++;saveJeunes();renderDetail();renderIndiv();sync('error','Erreur');toast('Erreur : '+e.message,'err');}
+  }catch(e){j.counts[pn]--;j.totalRecu=Math.max(0,(j.totalRecu||0)-1);s.dispo++;saveJeunes();renderDetail();renderIndiv();sync('error','Erreur');toast('Erreur : '+e.message,'err');}
 }
 // − : compteur −1 seulement (annule saisie, stock inchangé)
 function undoOne(id,pn){
@@ -560,6 +562,22 @@ function editCount(id,pn,el){
   inp.addEventListener('blur',commit);
   inp.addEventListener('keydown',e=>{if(e.key==='Enter')inp.blur();if(e.key==='Escape')renderDetail();});
 }
+// Édition directe du total reçu (compteur cumulatif de consommation)
+function editTotal(el){
+  const j=jeunes.find(x=>x.id===currentJeune);if(!j)return;
+  const cur=j.totalRecu||0;
+  const inp=document.createElement('input');
+  inp.type='number';inp.value=cur;inp.min=0;
+  inp.style.cssText='font-family:var(--display);font-size:1.6rem;font-weight:600;width:80px;text-align:center;border:1px solid var(--sage);border-radius:8px;outline:none;background:var(--white);color:var(--sage-d);padding:2px 4px';
+  el.replaceWith(inp);inp.focus();inp.select();
+  const commit=()=>{
+    const v=Math.max(0,parseInt(inp.value)||0);
+    j.totalRecu=v;saveJeunes();renderDetail();renderPersons();
+    toast(`Total ajusté à ${v} pour ${prenom(j.name)}`,'ok');
+  };
+  inp.addEventListener('blur',commit);
+  inp.addEventListener('keydown',e=>{if(e.key==='Enter')inp.blur();if(e.key==='Escape')renderDetail();});
+}
 // ↺ : remet ce compteur au quota (2)
 function resetOne(id,pn){
   const j=jeunes.find(x=>x.id===id);if(!j)return;
@@ -569,8 +587,10 @@ function resetOne(id,pn){
 // Reset complet de la personne
 function resetPersonne(){
   const j=jeunes.find(x=>x.id===currentJeune);if(!j)return;
-  if(!confirm(`Remettre tous les compteurs de ${j.name} au quota (${QUOTA}) ?`))return;
-  INDIV.forEach(p=>{j.counts[p]=QUOTA;});saveJeunes();renderDetail();renderPersons();renderIndiv();
+  if(!confirm(`Remettre les compteurs de ${j.name} au quota (${QUOTA}) et total reçu à 0 ?`))return;
+  INDIV.forEach(p=>{j.counts[p]=QUOTA;});
+  j.totalRecu=0;
+  saveJeunes();renderDetail();renderPersons();renderIndiv();
   toast('Compteurs remis au quota','ok');
 }
 
