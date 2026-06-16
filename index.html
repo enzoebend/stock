@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8"/>
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, viewport-fit=cover"/>
-  <title>Intendance — Centre Bernanos</title>
+  <title>Stock Bernanos</title>
   <link rel="preconnect" href="https://fonts.googleapis.com"/>
   <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,600;9..144,700&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet"/>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
@@ -31,6 +31,8 @@
     .head-right{display:flex;align-items:center;gap:10px}
     .user-badge{display:flex;align-items:center;gap:6px;font-size:0.7rem;color:var(--sage-d);background:var(--sage-l);padding:5px 10px;border-radius:20px;font-weight:600;cursor:pointer;transition:.15s}
     .user-badge:hover{background:var(--sage);color:var(--white)}
+    .logout-btn{background:none;border:1px solid var(--line);border-radius:50%;width:30px;height:30px;color:var(--muted);cursor:pointer;display:flex;align-items:center;justify-content:center;transition:.15s;padding:0}
+    .logout-btn:hover{border-color:var(--rust);color:var(--rust);background:var(--rust-l)}
     .sync{display:flex;align-items:center;gap:6px;font-size:0.64rem;color:var(--muted);font-family:var(--mono)}
     .dot{width:7px;height:7px;border-radius:50%;background:var(--muted);transition:.3s;flex-shrink:0}
     .dot.ok{background:var(--sage)}.dot.loading{background:var(--amber);animation:pulse 1s infinite}.dot.error{background:var(--rust)}
@@ -220,8 +222,8 @@
       </svg>
     </div>
     <div class="brand-txt">
-      <h1>Intendance</h1>
-      <div class="sub">Centre Bernanos</div>
+      <h1>Stock Bernanos</h1>
+      <div class="sub">Gestion des fournitures</div>
     </div>
   </div>
   <div class="head-right">
@@ -229,6 +231,9 @@
       <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><circle cx="12" cy="8" r="4"/><path d="M20 21a8 8 0 0 0-16 0"/></svg>
       <span id="user-name">—</span>
     </div>
+    <button class="logout-btn" id="logout-btn" title="Se déconnecter" style="display:none">
+      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+    </button>
     <div class="sync"><span class="dot" id="dot"></span><span id="sync-lbl">—</span></div>
   </div>
 </header>
@@ -785,8 +790,23 @@ function startApp(){
   document.getElementById('setup').style.display='none';
   document.getElementById('app').style.display='block';
   document.getElementById('user-badge').style.display='flex';
+  document.getElementById('logout-btn').style.display='flex';
   document.getElementById('user-name').textContent=USERNAME;
   loadFromNotion();
+}
+
+function logout(){
+  if(!confirm('Se déconnecter ? Le token et ton prénom seront effacés de cet appareil.'))return;
+  localStorage.removeItem('bern_token');
+  localStorage.removeItem('bern_user');
+  TOKEN='';USERNAME='';
+  document.getElementById('app').style.display='none';
+  document.getElementById('setup').style.display='block';
+  document.getElementById('user-badge').style.display='none';
+  document.getElementById('logout-btn').style.display='none';
+  document.getElementById('username-input').value='';
+  document.getElementById('token-input').value='';
+  toast('Déconnecté','ok');
 }
 function saveName(){
   const v=document.getElementById('username-input').value.trim();
@@ -822,6 +842,8 @@ window.addEventListener('DOMContentLoaded',()=>{
   document.getElementById('btn-add-person').addEventListener('click',()=>openAddModal('person'));
   document.getElementById('btn-add-confirm').addEventListener('click',confirmAdd);
   document.getElementById('add-input').addEventListener('keydown',e=>{if(e.key==='Enter')confirmAdd();});
+
+  document.getElementById('logout-btn').addEventListener('click',logout);
 
   document.getElementById('user-badge').addEventListener('click',()=>{
     const v=prompt('Ton prénom ?',USERNAME);
