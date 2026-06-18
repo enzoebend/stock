@@ -481,12 +481,14 @@ async function loadFromNotion(){
     prodData.results.forEach(pg=>{
       const pr=pg.properties;
       const name=pr['Nom']?.title?.[0]?.plain_text||'?';
-      const dispo=pr['Quantité dispo']?.number??0;
-      const total=pr['Quantité']?.number??10;
+      const dispo=pr['Quant']?.number??0;
+      const seuil=pr['Seuil d’alerte']?.number??10;
+      const commande=pr['Commandé']?.number??0;
       const last=pr['Dernière utilisation']?.date?.start||null;
-      const by=pr['Modifié par']?.rich_text?.[0]?.plain_text||'';
-      if(INDIV.includes(name))indivStock[name]={id:pg.id,dispo,total,last,by};
-      else shared.push({id:pg.id,name,dispo,total,last,by});
+      // Notion renvoie le champ 'Modifié par' en rich_text
+      const by=pr['Modifié par']?.rich_text?.[0]?.plain_text||pr['Modifié par']?.title?.[0]?.plain_text||'';
+      if(INDIV.includes(name))indivStock[name]={id:pg.id,dispo,seuil,commande,last,by};
+      else shared.push({id:pg.id,name,dispo,seuil,commande,last,by});
     });
 
     // Jeunes
@@ -510,7 +512,7 @@ async function loadFromNotion(){
 }
 
 // ══════════════ HELPERS ══════════════
-function lvl(d,t){if(d<=0)return'danger';if(t>0&&d/t<=0.2)return'warn';if(d<=5)return'warn';return'ok';}
+function lvl(d,s){if(d<=0)return'danger';if(d<=(s||10))return'warn';return'ok';}
 function pill(l){return l==='ok'?'<span class="pill pill-ok">En stock</span>':l==='warn'?'<span class="pill pill-warn">Bas</span>':'<span class="pill pill-danger">Épuisé</span>';}
 function pct(d,t){return t>0?Math.max(0,Math.min(100,d/t*100)):0;}
 function col(l){return l==='ok'?'var(--sage)':l==='warn'?'var(--amber)':'var(--rust)';}
@@ -631,13 +633,12 @@ function renderShared(){
   const el=document.getElementById('shared-cards');
   if(!shared.length){el.innerHTML='<p style="color:var(--muted);font-size:.82rem;padding:20px 0">Aucun produit partagé.</p>';return;}
   el.innerHTML=shared.map(p=>{
-    const l=lvl(p.dispo,p.total);
+    const l=lvl(p.dispo,p.seuil);
     return `<div class="card ${l}">
       <div>
         <div class="card-name">${p.name}</div>
-        <div class="card-line"><span class="card-num ${l}">${p.dispo}</span><span class="card-den">/ ${p.total}</span>${pill(l)}</div>
+        <div class="card-line"><span class="card-num ${l}">${p.dispo}</span><span class="card-den">en stock</span>${pill(l)}</div>
         <div class="card-sub">Dernier mouvement : ${dt(p.last)}${byHtml(p.by)}</div>
-        <div class="bar"><div class="bar-fill" style="width:${pct(p.dispo,p.total)}%;background:${col(l)}"></div></div>
       </div>
       <div class="btns-simple">
         <button class="bsq plus" onclick="moveShared('${p.id}',1)">+</button>
@@ -645,9 +646,9 @@ function renderShared(){
       </div>
     </div>`;
   }).join('');
-  const crit=shared.filter(p=>lvl(p.dispo,p.total)!=='ok');
+  const crit=shared.filter(p=>lvl(p.dispo,p.seuil)!=='ok');
   const b=document.getElementById('banner-shared');
-  if(crit.length){document.getElementById('banner-shared-list').innerHTML=crit.map(p=>`<strong>${p.name}</strong> — ${p.dispo}/${p.total}`).join('<br>');b.classList.add('on');}
+  if(crit.length){document.getElementById('banner-shared-list').innerHTML=crit.map(p=>`<strong>${p.name}</strong> — ${p.dispo} restant${p.dispo>1?'s':''}`).join('<br>');b.classList.add('on');}
   else b.classList.remove('on');
 }
 async function moveShared(id,d){
@@ -656,12 +657,12 @@ async function moveShared(id,d){
   addToHistory('stock','shared',{produit:p.name,delta:d});
   renderShared();sync('loading','Sync');
   try{
-    await notion(`pages/${id}`,'PATCH',{properties:{'Quantité dispo':{number:p.dispo},'Dernière utilisation':{date:{start:today()}},'Modifié par':byProp()}});
+    await notion(`pages/${id}`,'PATCH',{properties:{'Quant':{number:p.dispo},'Dernière utilisation':{date:{start:today()}},'Modifié par':byProp()}});
     sync('ok','À jour');
-    const l=lvl(p.dispo,p.total);
+    const l=lvl(p.dispo,p.seuil);
     if(l==='danger')toast(`${p.name} — épuisé`,'err');else if(l==='warn')toast(`${p.name} — stock bas`,'warn');else toast(`${d>0?'+1':'−1'} ${p.name}`,'ok');
   }catch(e){
-    if(e.message.includes('Failed to fetch')){enqueue({endpoint:`pages/${id}`,method:'PATCH',body:{properties:{'Quantité dispo':{number:p.dispo},'Dernière utilisation':{date:{start:today()}},'Modifié par':byProp()}}});updateOfflineBadge();toast('Hors-ligne — en file','warn');}
+    if(e.message.includes('Failed to fetch')){enqueue({endpoint:`pages/${id}`,method:'PATCH',body:{properties:{'Quant':{number:p.dispo},'Dernière utilisation':{date:{start:today()}},'Modifié par':byProp()}}});updateOfflineBadge();toast('Hors-ligne — en file','warn');}
     else {p.dispo-=d;renderShared();sync('error','Erreur');toast('Erreur : '+e.message,'err');}
   }
 }
@@ -672,19 +673,18 @@ function renderIndiv(){
   const donne={};INDIV.forEach(p=>{donne[p]=jeunes.reduce((s,j)=>s+(j.counts[p]||0),0);});
   const totStock=INDIV.reduce((s,p)=>s+(indivStock[p]?.dispo||0),0);
   const totGiven=jeunes.reduce((s,j)=>s+(j.totalRecu||0),0);
-  const nAlert=INDIV.filter(p=>indivStock[p]&&lvl(indivStock[p].dispo,indivStock[p].total)!=='ok').length;
+  const nAlert=INDIV.filter(p=>indivStock[p]&&lvl(indivStock[p].dispo,indivStock[p].seuil)!=='ok').length;
   document.getElementById('s-total').textContent=totStock;
   document.getElementById('s-given').textContent=totGiven;
   document.getElementById('s-alert').textContent=nAlert;
   if(!Object.keys(indivStock).length){el.innerHTML='<p style="color:var(--muted);font-size:.82rem;padding:20px 0">Aucune fourniture. Clique + pour en ajouter.</p>';return;}
   el.innerHTML=INDIV.filter(pn=>indivStock[pn]).map(pn=>{
-    const s=indivStock[pn];const l=lvl(s.dispo,s.total);
+    const s=indivStock[pn];const l=lvl(s.dispo,s.seuil);
     return `<div class="card ${l}">
       <div>
         <div class="card-name">${pn}</div>
-        <div class="card-line"><span class="card-num ${l}">${s.dispo}</span><span class="card-den">/ ${s.total}</span>${pill(l)}</div>
+        <div class="card-line"><span class="card-num ${l}">${s.dispo}</span><span class="card-den">en stock</span>${pill(l)}</div>
         <div class="card-sub">Distribués total : <strong>${donne[pn]}</strong> · ${dt(s.last)}${byHtml(s.by)}</div>
-        <div class="bar"><div class="bar-fill" style="width:${pct(s.dispo,s.total)}%;background:${col(l)}"></div></div>
       </div>
       <div class="btns-simple">
         <button class="bsq plus" onclick="moveIndiv('${pn}',1)">+</button>
@@ -692,9 +692,9 @@ function renderIndiv(){
       </div>
     </div>`;
   }).join('');
-  const crit=INDIV.filter(p=>indivStock[p]&&lvl(indivStock[p].dispo,indivStock[p].total)!=='ok');
+  const crit=INDIV.filter(p=>indivStock[p]&&lvl(indivStock[p].dispo,indivStock[p].seuil)!=='ok');
   const b=document.getElementById('banner-indiv');
-  if(crit.length){document.getElementById('banner-indiv-list').innerHTML=crit.map(p=>`<strong>${p}</strong> — ${indivStock[p].dispo}/${indivStock[p].total}`).join('<br>');b.classList.add('on');}
+  if(crit.length){document.getElementById('banner-indiv-list').innerHTML=crit.map(p=>`<strong>${p}</strong> — ${indivStock[p].dispo} restant${indivStock[p].dispo>1?'s':''}`).join('<br>');b.classList.add('on');}
   else b.classList.remove('on');
 }
 async function moveIndiv(pn,d){
@@ -703,10 +703,10 @@ async function moveIndiv(pn,d){
   addToHistory('stock','indiv',{produit:pn,delta:d});
   renderIndiv();sync('loading','Sync');
   try{
-    await notion(`pages/${s.id}`,'PATCH',{properties:{'Quantité dispo':{number:s.dispo},'Dernière utilisation':{date:{start:today()}},'Modifié par':byProp()}});
+    await notion(`pages/${s.id}`,'PATCH',{properties:{'Quant':{number:s.dispo},'Dernière utilisation':{date:{start:today()}},'Modifié par':byProp()}});
     sync('ok','À jour');toast(`${d>0?'+1':'−1'} ${pn}`,'ok');
   }catch(e){
-    if(e.message.includes('Failed to fetch')){enqueue({endpoint:`pages/${s.id}`,method:'PATCH',body:{properties:{'Quantité dispo':{number:s.dispo},'Dernière utilisation':{date:{start:today()}},'Modifié par':byProp()}}});updateOfflineBadge();toast('Hors-ligne — en file','warn');}
+    if(e.message.includes('Failed to fetch')){enqueue({endpoint:`pages/${s.id}`,method:'PATCH',body:{properties:{'Quant':{number:s.dispo},'Dernière utilisation':{date:{start:today()}},'Modifié par':byProp()}}});updateOfflineBadge();toast('Hors-ligne — en file','warn');}
     else {s.dispo-=d;renderIndiv();sync('error','Erreur');toast('Erreur : '+e.message,'err');}
   }
 }
@@ -762,13 +762,14 @@ function renderDetail(){
     const s=indivStock[pn];const dispo=s?s.dispo:0;
     const stockOk=dispo>0;
     // Trouver la dernière distribution de ce produit pour ce jeune dans l'historique
-    const lastDist=getLastDistribution(j.id,pn);
-    const lastStr=lastDist?`Dernière fois : ${formatDateTime(lastDist)}`:'Jamais reçu';
+    // Trouver la dernière action sur ce produit pour ce jeune
+    const lastEvent=loadHistory().find(e=>e.target===j.id&&e.detail&&e.detail.produit===pn);
+    const lastStr=lastEvent?`Dernière modif : ${formatDateTime(lastEvent.ts)} · par ${lastEvent.user||'?'}`:'Jamais modifié';
     return `<div class="card ${dispo<=0?'danger':dispo<=5?'warn':'ok'}">
       <div>
         <div class="card-name">${pn}</div>
         <div class="card-sub" style="margin-top:5px">${lastStr}</div>
-        <div class="card-sub" style="margin-top:2px">Stock disponible : <strong style="color:${dispo<=0?'var(--rust)':'var(--ink)'}">${dispo}</strong> · Reçu total : <strong>${qty}</strong></div>
+        <div class="card-sub" style="margin-top:2px">Stock disponible : <strong style="color:${dispo<=0?'var(--rust)':'var(--ink)'}">${dispo}</strong></div>
       </div>
       <div class="btns-simple">
         <button class="bsq plus" onclick="giveOne('${j.id}','${pn}')" ${!stockOk?'disabled':''} title="Donner 1">+</button>
@@ -793,13 +794,13 @@ async function giveOne(id,pn){
   sync('loading','Sync');
   try{
     await Promise.all([
-      notion(`pages/${s.id}`,'PATCH',{properties:{'Quantité dispo':{number:s.dispo},'Dernière utilisation':{date:{start:today()}},'Modifié par':byProp()}}),
+      notion(`pages/${s.id}`,'PATCH',{properties:{'Quant':{number:s.dispo},'Dernière utilisation':{date:{start:today()}},'Modifié par':byProp()}}),
       notion(`pages/${j.id}`,'PATCH',{properties:{[pn]:{number:j.counts[pn]},'Total reçu':{number:j.totalRecu},'Modifié par':byProp()}})
     ]);
     sync('ok','À jour');toast(`${pn} → ${prenom(j.name)}`,'ok');
   }catch(e){
     if(e.message.includes('Failed to fetch')||e.message.includes('Network')){
-      enqueue({endpoint:`pages/${s.id}`,method:'PATCH',body:{properties:{'Quantité dispo':{number:s.dispo},'Dernière utilisation':{date:{start:today()}},'Modifié par':byProp()}}});
+      enqueue({endpoint:`pages/${s.id}`,method:'PATCH',body:{properties:{'Quant':{number:s.dispo},'Dernière utilisation':{date:{start:today()}},'Modifié par':byProp()}}});
       enqueue({endpoint:`pages/${j.id}`,method:'PATCH',body:{properties:{[pn]:{number:j.counts[pn]},'Total reçu':{number:j.totalRecu},'Modifié par':byProp()}}});
       sync('error','Hors-ligne');toast('Hors-ligne — ajouté à la file','warn');
       updateOfflineBadge();
@@ -895,7 +896,7 @@ function openAddModal(mode){
   const titles={shared:'Ajouter un produit partagé',indiv:'Ajouter une fourniture',person:'Ajouter un jeune'};
   const placeholders={shared:'Ex: Éponges',indiv:'Ex: Coton-tige',person:'Ex: DUPONT Marie'};
   const labels={shared:'Nom du produit',indiv:'Nom de la fourniture',person:'Nom complet'};
-  const descs={shared:'Stock initial : 10 unités',indiv:'Stock initial : 80 unités (modifiable ensuite)',person:`Démarre au quota (${QUOTA} de chaque fourniture)`};
+  const descs={shared:'Stock initial : 10 unités · seuil d\'alerte : 3',indiv:'Stock initial : 80 unités · seuil d\'alerte : 10',person:`Démarre au quota (${QUOTA} de chaque fourniture)`};
   document.getElementById('add-title').textContent=titles[mode];
   document.getElementById('add-label').textContent=labels[mode];
   document.getElementById('add-desc').textContent=descs[mode];
@@ -915,7 +916,7 @@ async function confirmAdd(){
       await notion('pages','POST',{parent:{database_id:DB_PRODUCTS},properties:{
         'Nom':{title:[{text:{content:name}}]},
         'Quantité':{number:10},
-        'Quantité dispo':{number:10},
+        'Quant':{number:10},
         'Type':{select:{name:'Produit'}},
         'Modifié par':byProp()
       }});
@@ -926,7 +927,7 @@ async function confirmAdd(){
       await notion('pages','POST',{parent:{database_id:DB_PRODUCTS},properties:{
         'Nom':{title:[{text:{content:name}}]},
         'Quantité':{number:80},
-        'Quantité dispo':{number:80},
+        'Quant':{number:80},
         'Type':{select:{name:'Produit'}},
         'Modifié par':byProp()
       }});
