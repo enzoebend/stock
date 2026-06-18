@@ -209,6 +209,30 @@
     .sk::after{content:'';position:absolute;inset:0;background:linear-gradient(90deg,transparent,var(--paper2),transparent);animation:shimmer 1.5s infinite}
     @keyframes shimmer{0%{transform:translateX(-100%)}100%{transform:translateX(100%)}}
 
+    /* Search bar */
+    .search-bar{display:flex;align-items:center;gap:8px;background:var(--white);border:1px solid var(--line);border-radius:11px;padding:10px 14px;margin-bottom:12px;box-shadow:var(--shadow);transition:border-color .2s}
+    .search-bar:focus-within{border-color:var(--sage)}
+    .search-bar svg{color:var(--muted);flex-shrink:0}
+    .search-bar input{flex:1;border:none;outline:none;background:none;font-family:var(--body);font-size:0.88rem;color:var(--ink);min-width:0}
+    .search-bar input::placeholder{color:var(--muted)}
+    .search-clear{background:none;border:none;color:var(--muted);font-size:1.3rem;cursor:pointer;padding:0;line-height:1;width:22px;height:22px;display:flex;align-items:center;justify-content:center;border-radius:50%;transition:.15s}
+    .search-clear:hover{background:var(--rust-l);color:var(--rust)}
+
+    /* Offline indicator */
+    .offline-badge{display:none;background:var(--amber);color:var(--white);padding:8px 14px;text-align:center;font-size:0.75rem;font-weight:600;position:sticky;top:60px;z-index:80}
+    .offline-badge.on{display:block}
+    .offline-badge.synced{background:var(--sage)}
+
+    /* Historique */
+    .hist-list{max-height:360px;overflow-y:auto;background:var(--paper);border:1px solid var(--line);border-radius:11px;padding:8px}
+    .hist-item{padding:9px 11px;border-bottom:1px solid var(--line);font-size:0.78rem;display:flex;justify-content:space-between;align-items:center;gap:8px}
+    .hist-item:last-child{border-bottom:none}
+    .hist-meta{color:var(--muted);font-size:0.68rem;font-family:var(--mono)}
+    .hist-action{flex:1;min-width:0}
+    .hist-action strong{color:var(--sage-d);font-weight:600}
+    .hist-action.undo strong{color:var(--rust)}
+    .hist-empty{padding:24px;text-align:center;color:var(--muted);font-size:0.8rem}
+
     @media(min-width:600px){header{padding:16px 28px}.tabs{top:75px}.view{padding:24px 28px}}
   </style>
 </head>
@@ -237,6 +261,10 @@
     <div class="sync"><span class="dot" id="dot"></span><span id="sync-lbl">—</span></div>
   </div>
 </header>
+
+<div class="offline-badge" id="offline-badge">
+  <span id="offline-text">📡 Hors-ligne — modifications en file d'attente</span>
+</div>
 
 <!-- ─── SETUP ─── -->
 <div id="setup">
@@ -284,6 +312,10 @@
     <button class="tab" data-v="persons">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75"/></svg>
       Jeunes
+    </button>
+    <button class="tab" data-v="history">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+      Historique
     </button>
   </div>
 
@@ -337,8 +369,30 @@
       <div class="stat"><div class="stat-n" id="p-given" style="color:var(--sage)">—</div><div class="stat-l">Total reçu</div></div>
       <div class="stat"><div class="stat-n" id="p-over" style="color:var(--amber)">—</div><div class="stat-l">Surconso.</div></div>
     </div>
+    <div class="search-bar">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+      <input type="text" id="search-persons" placeholder="Rechercher un jeune..." oninput="renderPersons()"/>
+      <button class="search-clear" onclick="document.getElementById('search-persons').value='';renderPersons();" title="Effacer">×</button>
+    </div>
     <div class="pgrid" id="pgrid"><div class="sk" style="height:55px"></div><div class="sk" style="height:55px"></div><div class="sk" style="height:55px"></div></div>
     <div class="bbar"><button class="btn-bar" id="btn-refresh-persons">↻ Actualiser</button></div>
+  </div>
+
+  <!-- HISTORIQUE -->
+  <div id="view-history" class="view">
+    <div class="shead">
+      <div class="shead-l">
+        <h2>Historique</h2>
+        <p>Dernières 100 actions effectuées sur cet appareil.</p>
+      </div>
+      <button class="btn-add" style="background:var(--rust);font-size:0.9rem" id="btn-clear-history" title="Vider l'historique">🗑</button>
+    </div>
+    <div class="search-bar">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+      <input type="text" id="search-history" placeholder="Filtrer par nom, produit..." oninput="renderHistory()"/>
+      <button class="search-clear" onclick="document.getElementById('search-history').value='';renderHistory();">×</button>
+    </div>
+    <div class="hist-list" id="history-list"></div>
   </div>
 
   <!-- DÉTAIL JEUNE -->
@@ -349,8 +403,8 @@
     </div>
     <div class="stats">
       <div class="stat"><div class="stat-n" id="d-total" style="color:var(--sage);cursor:pointer" title="Clique pour modifier" onclick="editTotal(this)">0</div><div class="stat-l">Total reçu</div></div>
-      <div class="stat"><div class="stat-n" id="d-quota" style="color:var(--ink)">0/9</div><div class="stat-l">Quota atteint</div></div>
-      <div class="stat"><div class="stat-n" id="d-over" style="color:var(--amber)">0</div><div class="stat-l">En excès</div></div>
+      <div class="stat"><div class="stat-n" id="d-last" style="color:var(--ink);font-size:1.1rem">—</div><div class="stat-l">Dernière maj</div></div>
+      <div class="stat"><div class="stat-n" id="d-products" style="color:var(--amber)">0</div><div class="stat-l">Produits reçus</div></div>
     </div>
     <div class="cards" id="detail-cards"></div>
     <div class="bbar">
@@ -465,6 +519,113 @@ function today(){return new Date().toISOString().split('T')[0];}
 function prenom(n){return n.split(' ').slice(-1)[0];}
 function byHtml(by){return by?`<span class="by-tag">par ${by}</span>`:'';}
 
+// ═══ DATES ═══
+function formatDateShort(iso){
+  if(!iso)return'—';
+  const d=new Date(iso);const now=new Date();
+  const diffMs=now-d;const diffH=diffMs/(1000*60*60);
+  if(diffH<1)return 'à l\'instant';
+  if(diffH<24)return `il y a ${Math.floor(diffH)}h`;
+  const diffD=Math.floor(diffH/24);
+  if(diffD<7)return `il y a ${diffD}j`;
+  return d.toLocaleDateString('fr-FR');
+}
+function formatDateTime(iso){
+  if(!iso)return'—';
+  return new Date(iso).toLocaleString('fr-FR',{day:'2-digit',month:'short',hour:'2-digit',minute:'2-digit'});
+}
+
+// ═══ HISTORIQUE ═══
+function loadHistory(){return JSON.parse(localStorage.getItem('bern_history')||'[]');}
+function saveHistory(h){localStorage.setItem('bern_history',JSON.stringify(h.slice(0,100)));}
+function addToHistory(action,target,detail){
+  const h=loadHistory();
+  h.unshift({ts:new Date().toISOString(),user:USERNAME,action,target,detail});
+  saveHistory(h);
+}
+function getLastDistribution(jeuneId,produit){
+  return loadHistory().find(e=>e.target===jeuneId&&e.detail&&e.detail.produit===produit&&e.action==='give')?.ts||null;
+}
+function getJeuneLastUpdate(jeuneId){
+  return loadHistory().find(e=>e.target===jeuneId)?.ts||null;
+}
+
+// ═══ OFFLINE ═══
+let isOnline=navigator.onLine;
+function loadQueue(){return JSON.parse(localStorage.getItem('bern_queue')||'[]');}
+function saveQueue(q){localStorage.setItem('bern_queue',JSON.stringify(q));}
+function enqueue(req){const q=loadQueue();q.push(req);saveQueue(q);updateOfflineBadge();}
+async function flushQueue(){
+  const q=loadQueue();if(!q.length)return;
+  document.getElementById('offline-text').textContent='🔄 Synchronisation de '+q.length+' modifs...';
+  const failed=[];
+  for(const req of q){
+    try{await notion(req.endpoint,req.method,req.body);}
+    catch(e){failed.push(req);}
+  }
+  saveQueue(failed);
+  if(failed.length===0){
+    document.getElementById('offline-badge').classList.add('synced');
+    document.getElementById('offline-text').textContent='✅ Tout synchronisé';
+    setTimeout(()=>{document.getElementById('offline-badge').classList.remove('on','synced');},2500);
+    await loadFromNotion();
+  } else updateOfflineBadge();
+}
+function updateOfflineBadge(){
+  const b=document.getElementById('offline-badge');
+  const q=loadQueue();
+  if(!isOnline){
+    b.classList.add('on');b.classList.remove('synced');
+    document.getElementById('offline-text').textContent=`📡 Hors-ligne — ${q.length} modifs en attente`;
+  } else if(q.length>0){
+    b.classList.add('on');b.classList.remove('synced');
+    document.getElementById('offline-text').textContent=`🔄 ${q.length} modifs à synchroniser`;
+  } else {
+    b.classList.remove('on');
+  }
+}
+
+// Wrapper notion avec gestion offline
+async function safeNotion(endpoint,method,body){
+  if(!isOnline){enqueue({endpoint,method,body});return null;}
+  try{return await notion(endpoint,method,body);}
+  catch(e){
+    if(e.message.includes('Failed to fetch')||e.message.includes('Network')){
+      enqueue({endpoint,method,body});updateOfflineBadge();
+      return null;
+    }
+    throw e;
+  }
+}
+
+// ═══ RENDER HISTORIQUE ═══
+function renderHistory(){
+  const list=document.getElementById('history-list');
+  const search=(document.getElementById('search-history')?.value||'').toLowerCase();
+  let h=loadHistory();
+  if(search){
+    h=h.filter(e=>{
+      const j=jeunes.find(x=>x.id===e.target);
+      const name=j?j.name.toLowerCase():'';
+      return name.includes(search)||(e.detail?.produit||'').toLowerCase().includes(search)||(e.user||'').toLowerCase().includes(search);
+    });
+  }
+  if(!h.length){list.innerHTML='<div class="hist-empty">Aucune action enregistrée.</div>';return;}
+  list.innerHTML=h.map(e=>{
+    const j=jeunes.find(x=>x.id===e.target);
+    const name=j?j.name:'?';
+    let actionText='';let cls='';
+    if(e.action==='give')actionText=`<strong>${e.user||'?'}</strong> a donné <strong>${e.detail.produit}</strong> à <strong>${name}</strong>`;
+    else if(e.action==='undo'){actionText=`<strong>${e.user||'?'}</strong> a annulé <strong>${e.detail.produit}</strong> pour <strong>${name}</strong>`;cls='undo';}
+    else if(e.action==='stock')actionText=`<strong>${e.user||'?'}</strong> a ${e.detail.delta>0?'ajouté':'retiré'} ${Math.abs(e.detail.delta)} de <strong>${e.detail.produit}</strong>`;
+    else if(e.action==='reset')actionText=`<strong>${e.user||'?'}</strong> a réinitialisé <strong>${name}</strong>`;
+    else if(e.action==='create')actionText=`<strong>${e.user||'?'}</strong> a créé <strong>${e.detail.nom}</strong> (${e.detail.type})`;
+    else if(e.action==='delete')actionText=`<strong>${e.user||'?'}</strong> a supprimé <strong>${name}</strong>`;
+    else actionText=`<strong>${e.action}</strong>`;
+    return `<div class="hist-item"><div class="hist-action ${cls}">${actionText}</div><div class="hist-meta">${formatDateShort(e.ts)}</div></div>`;
+  }).join('');
+}
+
 // ══════════════ STOCK PARTAGÉ ══════════════
 function renderShared(){
   const el=document.getElementById('shared-cards');
@@ -491,13 +652,18 @@ function renderShared(){
 }
 async function moveShared(id,d){
   const p=shared.find(x=>x.id===id);if(!p)return;
-  p.dispo=Math.max(0,p.dispo+d);p.by=USERNAME;renderShared();sync('loading','Sync');
+  p.dispo=Math.max(0,p.dispo+d);p.by=USERNAME;
+  addToHistory('stock','shared',{produit:p.name,delta:d});
+  renderShared();sync('loading','Sync');
   try{
     await notion(`pages/${id}`,'PATCH',{properties:{'Quantité dispo':{number:p.dispo},'Dernière utilisation':{date:{start:today()}},'Modifié par':byProp()}});
     sync('ok','À jour');
     const l=lvl(p.dispo,p.total);
     if(l==='danger')toast(`${p.name} — épuisé`,'err');else if(l==='warn')toast(`${p.name} — stock bas`,'warn');else toast(`${d>0?'+1':'−1'} ${p.name}`,'ok');
-  }catch(e){p.dispo-=d;renderShared();sync('error','Erreur');toast('Erreur : '+e.message,'err');}
+  }catch(e){
+    if(e.message.includes('Failed to fetch')){enqueue({endpoint:`pages/${id}`,method:'PATCH',body:{properties:{'Quantité dispo':{number:p.dispo},'Dernière utilisation':{date:{start:today()}},'Modifié par':byProp()}}});updateOfflineBadge();toast('Hors-ligne — en file','warn');}
+    else {p.dispo-=d;renderShared();sync('error','Erreur');toast('Erreur : '+e.message,'err');}
+  }
 }
 
 // ══════════════ FOURNITURES ══════════════
@@ -533,31 +699,46 @@ function renderIndiv(){
 }
 async function moveIndiv(pn,d){
   const s=indivStock[pn];if(!s)return;
-  s.dispo=Math.max(0,s.dispo+d);s.by=USERNAME;renderIndiv();sync('loading','Sync');
+  s.dispo=Math.max(0,s.dispo+d);s.by=USERNAME;
+  addToHistory('stock','indiv',{produit:pn,delta:d});
+  renderIndiv();sync('loading','Sync');
   try{
     await notion(`pages/${s.id}`,'PATCH',{properties:{'Quantité dispo':{number:s.dispo},'Dernière utilisation':{date:{start:today()}},'Modifié par':byProp()}});
     sync('ok','À jour');toast(`${d>0?'+1':'−1'} ${pn}`,'ok');
-  }catch(e){s.dispo-=d;renderIndiv();sync('error','Erreur');toast('Erreur : '+e.message,'err');}
+  }catch(e){
+    if(e.message.includes('Failed to fetch')){enqueue({endpoint:`pages/${s.id}`,method:'PATCH',body:{properties:{'Quantité dispo':{number:s.dispo},'Dernière utilisation':{date:{start:today()}},'Modifié par':byProp()}}});updateOfflineBadge();toast('Hors-ligne — en file','warn');}
+    else {s.dispo-=d;renderIndiv();sync('error','Erreur');toast('Erreur : '+e.message,'err');}
+  }
 }
 
 // ══════════════ JEUNES ══════════════
 function renderPersons(){
   const totGiven=jeunes.reduce((s,j)=>s+(j.totalRecu||0),0);
-  const over=jeunes.filter(j=>INDIV.some(p=>j.counts[p]>QUOTA*2)).length;
+  // Moyenne des reçus / nb de jeunes
+  const avg=jeunes.length?Math.round(totGiven/jeunes.length):0;
+  // Surconsommateurs = au-dessus de 1.5× la moyenne
+  const over=jeunes.filter(j=>(j.totalRecu||0)>avg*1.5&&avg>0).length;
+
   document.getElementById('p-total').textContent=jeunes.length;
   document.getElementById('p-given').textContent=totGiven;
   document.getElementById('p-over').textContent=over;
-  if(!jeunes.length){document.getElementById('pgrid').innerHTML='<p style="color:var(--muted);font-size:.82rem;padding:20px 0;grid-column:1/-1">Aucun jeune. Clique + pour ajouter.</p>';return;}
-  document.getElementById('pgrid').innerHTML=jeunes.map(j=>{
+
+  const searchTerm=(document.getElementById('search-persons')?.value||'').toLowerCase();
+  const filtered=searchTerm?jeunes.filter(j=>j.name.toLowerCase().includes(searchTerm)):jeunes;
+
+  if(!filtered.length){document.getElementById('pgrid').innerHTML='<p style="color:var(--muted);font-size:.82rem;padding:20px 0;grid-column:1/-1">'+(searchTerm?'Aucun résultat.':'Aucun jeune. Clique + pour ajouter.')+'</p>';return;}
+
+  document.getElementById('pgrid').innerHTML=filtered.map(j=>{
     const tot=j.totalRecu||0;
-    const isOver=INDIV.some(p=>j.counts[p]>QUOTA*2);
-    const full=INDIV.every(p=>j.counts[p]>=QUOTA);
-    return `<div class="pchip ${isOver?'over':full?'done':''}" onclick="openDetail('${j.id}')">
+    const isOver=avg>0&&tot>avg*1.5;
+    const lastUp=getJeuneLastUpdate(j.id);
+    const lastStr=lastUp?formatDateShort(lastUp):'jamais';
+    return `<div class="pchip ${isOver?'over':''}" onclick="openDetail('${j.id}')">
       <div class="pchip-top">
         <div class="pchip-name">${j.name}</div>
-        <span class="pchip-badge">${isOver?'⚠':full?'✓':''}</span>
+        <span class="pchip-badge">${isOver?'⚠':''}</span>
       </div>
-      <div class="pchip-meta">${tot} reçus${j.by?' · '+j.by:''}</div>
+      <div class="pchip-meta">${tot} reçus · ${lastStr}</div>
     </div>`;
   }).join('');
 }
@@ -571,32 +752,27 @@ function openDetail(id){
 function renderDetail(){
   const j=jeunes.find(x=>x.id===currentJeune);if(!j)return;
   const tot=j.totalRecu||0;
-  const quotaOk=INDIV.filter(p=>j.counts[p]>=QUOTA).length;
-  const exces=INDIV.filter(p=>j.counts[p]>QUOTA*2).length;
+  const productsReceived=INDIV.filter(p=>j.counts[p]>0).length;
+  const lastUp=getJeuneLastUpdate(j.id);
   document.getElementById('d-total').textContent=tot;
-  document.getElementById('d-quota').textContent=`${quotaOk}/${INDIV.length}`;
-  document.getElementById('d-over').textContent=exces;
+  document.getElementById('d-last').textContent=lastUp?formatDateShort(lastUp):'jamais';
+  document.getElementById('d-products').textContent=`${productsReceived}/${INDIV.length}`;
   document.getElementById('detail-cards').innerHTML=INDIV.map(pn=>{
     const qty=j.counts[pn]||0;
     const s=indivStock[pn];const dispo=s?s.dispo:0;
-    let cl='ok';if(qty>QUOTA*2)cl='danger';else if(qty>QUOTA)cl='warn';
     const stockOk=dispo>0;
-    let mark='';
-    if(qty>QUOTA*2)mark='<span style="font-size:.62rem;color:var(--rust);font-weight:600">excès</span>';
-    else if(qty>QUOTA)mark='<span style="font-size:.62rem;color:var(--amber);font-weight:600">élevé</span>';
-    else if(qty>=QUOTA)mark='<span style="font-size:.62rem;color:var(--sage);font-weight:600">quota ✓</span>';
-    return `<div class="card ${cl}">
+    // Trouver la dernière distribution de ce produit pour ce jeune dans l'historique
+    const lastDist=getLastDistribution(j.id,pn);
+    const lastStr=lastDist?`Dernière fois : ${formatDateTime(lastDist)}`:'Jamais reçu';
+    return `<div class="card ${dispo<=0?'danger':dispo<=5?'warn':'ok'}">
       <div>
-        <div class="card-name">${pn} ${mark}</div>
-        <div class="card-sub" style="margin-top:5px">Stock disponible : <strong style="color:${dispo<=0?'var(--rust)':'var(--ink)'}">${dispo}</strong> · quota ${QUOTA}</div>
+        <div class="card-name">${pn}</div>
+        <div class="card-sub" style="margin-top:5px">${lastStr}</div>
+        <div class="card-sub" style="margin-top:2px">Stock disponible : <strong style="color:${dispo<=0?'var(--rust)':'var(--ink)'}">${dispo}</strong> · Reçu total : <strong>${qty}</strong></div>
       </div>
-      <div class="ctl">
-        <div class="stepper">
-          <button class="step plus" onclick="giveOne('${j.id}','${pn}')" ${!stockOk?'disabled':''}>+</button>
-          <div class="step-val" onclick="editCount('${j.id}','${pn}',this)">${qty}</div>
-          <button class="step minus" onclick="undoOne('${j.id}','${pn}')" ${qty<=0?'disabled':''}>−</button>
-        </div>
-        <button class="mini-reset" onclick="resetOne('${j.id}','${pn}')">↺ quota</button>
+      <div class="btns-simple">
+        <button class="bsq plus" onclick="giveOne('${j.id}','${pn}')" ${!stockOk?'disabled':''} title="Donner 1">+</button>
+        <button class="bsq minus" onclick="undoOne('${j.id}','${pn}')" ${qty<=0?'disabled':''} title="Annuler 1">−</button>
       </div>
     </div>`;
   }).join('');
@@ -612,6 +788,7 @@ async function giveOne(id,pn){
   j.totalRecu=(j.totalRecu||0)+1;
   j.by=USERNAME;
   s.dispo=Math.max(0,s.dispo-1);s.by=USERNAME;
+  addToHistory('give',j.id,{produit:pn});
   renderDetail();renderPersons();renderIndiv();
   sync('loading','Sync');
   try{
@@ -621,20 +798,34 @@ async function giveOne(id,pn){
     ]);
     sync('ok','À jour');toast(`${pn} → ${prenom(j.name)}`,'ok');
   }catch(e){
-    j.counts[pn]--;j.totalRecu--;s.dispo++;
-    renderDetail();renderIndiv();renderPersons();
-    sync('error','Erreur');toast('Erreur : '+e.message,'err');
+    if(e.message.includes('Failed to fetch')||e.message.includes('Network')){
+      enqueue({endpoint:`pages/${s.id}`,method:'PATCH',body:{properties:{'Quantité dispo':{number:s.dispo},'Dernière utilisation':{date:{start:today()}},'Modifié par':byProp()}}});
+      enqueue({endpoint:`pages/${j.id}`,method:'PATCH',body:{properties:{[pn]:{number:j.counts[pn]},'Total reçu':{number:j.totalRecu},'Modifié par':byProp()}}});
+      sync('error','Hors-ligne');toast('Hors-ligne — ajouté à la file','warn');
+      updateOfflineBadge();
+    } else {
+      j.counts[pn]--;j.totalRecu--;s.dispo++;
+      renderDetail();renderIndiv();renderPersons();
+      sync('error','Erreur');toast('Erreur : '+e.message,'err');
+    }
   }
 }
 // − : annule saisie, compteur produit −1, totalRecu INCHANGÉ (consommation cumulée)
 async function undoOne(id,pn){
   const j=jeunes.find(x=>x.id===id);if(!j||(j.counts[pn]||0)<=0)return;
-  j.counts[pn]--;j.by=USERNAME;renderDetail();renderPersons();
+  j.counts[pn]--;j.by=USERNAME;
+  addToHistory('undo',j.id,{produit:pn});
+  renderDetail();renderPersons();
   sync('loading','Sync');
   try{
     await notion(`pages/${j.id}`,'PATCH',{properties:{[pn]:{number:j.counts[pn]},'Modifié par':byProp()}});
     sync('ok','À jour');toast(`Annulé — ${pn}`,'ok');
-  }catch(e){j.counts[pn]++;renderDetail();sync('error','Erreur');toast('Erreur : '+e.message,'err');}
+  }catch(e){
+    if(e.message.includes('Failed to fetch')){
+      enqueue({endpoint:`pages/${j.id}`,method:'PATCH',body:{properties:{[pn]:{number:j.counts[pn]},'Modifié par':byProp()}}});
+      updateOfflineBadge();toast('Hors-ligne — en file','warn');
+    } else {j.counts[pn]++;renderDetail();sync('error','Erreur');toast('Erreur : '+e.message,'err');}
+  }
 }
 // Édition directe d'un compteur produit
 function editCount(id,pn,el){
@@ -718,6 +909,7 @@ async function confirmAdd(){
   const name=document.getElementById('add-input').value.trim();
   if(!name){toast('Nom requis','err');return;}
   sync('loading','Création...');
+  addToHistory('create',null,{nom:name,type:addMode});
   try{
     if(addMode==='shared'){
       await notion('pages','POST',{parent:{database_id:DB_PRODUCTS},properties:{
@@ -755,6 +947,7 @@ async function deletePersonne(){
   const j=jeunes.find(x=>x.id===currentJeune);if(!j)return;
   if(!confirm(`Supprimer ${j.name} définitivement ?`))return;
   sync('loading','Suppression...');
+  addToHistory('delete',j.id,{nom:j.name});
   try{
     await notion(`pages/${j.id}`,'PATCH',{archived:true});
     toast(`${j.name} supprimé`,'ok');
@@ -861,6 +1054,28 @@ window.addEventListener('DOMContentLoaded',()=>{
 
   const tok=new URLSearchParams(window.location.search).get('tok');
   if(tok){TOKEN=tok;localStorage.setItem('bern_token',tok);window.history.replaceState({},'',window.location.pathname);if(USERNAME)startApp();}
+
+  // ═══ OFFLINE / ONLINE ═══
+  window.addEventListener('online',()=>{
+    isOnline=true;updateOfflineBadge();
+    if(loadQueue().length>0)flushQueue();
+  });
+  window.addEventListener('offline',()=>{
+    isOnline=false;updateOfflineBadge();
+  });
+  updateOfflineBadge();
+  if(isOnline&&loadQueue().length>0)setTimeout(flushQueue,1500);
+
+  // ═══ HISTORIQUE ═══
+  document.getElementById('btn-clear-history').addEventListener('click',()=>{
+    if(confirm('Vider l\'historique local ? (sans effet sur Notion)')){
+      saveHistory([]);renderHistory();toast('Historique vidé','ok');
+    }
+  });
+
+  // Render historique quand on ouvre l'onglet
+  const obsTabHist=document.querySelector('[data-v="history"]');
+  if(obsTabHist)obsTabHist.addEventListener('click',()=>setTimeout(renderHistory,50));
 });
 </script>
 </body>
